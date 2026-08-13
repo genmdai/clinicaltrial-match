@@ -22,8 +22,6 @@ Built with **AWS Strands Agents SDK**, **Claude on Amazon Bedrock**, **ClinicalT
 
 ## Collaborators
 
-Built for NTU's CAmpcOde Hackathon 2025 - Code with AI, The SUPERCELLS project is made possible by the contributions of the following individuals:
-
 | Name | GitHub | LinkedIn |
 |------|--------|----------|
 | Nicole Ang | [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nicoleang18) | [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/nicoleang18/) |
