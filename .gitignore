@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+
+# Node
+node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Env & secrets
+.env
+.env.*
+!.env.example
+
+# Fixtures cache (named demo fixtures stay tracked; only the request-hash cache is ignored)
+fixtures/cache/
+
+# OS / editor
+.DS_Store
+.vscode/
+.idea/
