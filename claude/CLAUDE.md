@@ -141,10 +141,13 @@ doc/hallucination drift)
   details have not been submitted for this account. Fill out the Anthropic use case
   details form before using the model.` This is a separate, additional gate from
   the normal Bedrock "model access" request — it's an Anthropic-specific account-
-  level use-case questionnaire in the Bedrock console. **Blocking**: waiting on the
-  human to submit that form (Bedrock console → Model access, or the link in the
-  error message) before the echo agent (and all subsequent LLM calls) can actually
-  run. AWS states propagation can take up to 15 minutes after submission.
+  level use-case questionnaire in the Bedrock console. Resolved once the human
+  submitted that form (propagated within a few minutes). If this project moves to a
+  fresh AWS account later, expect to hit this again and budget time for it.
+- **Echo agent confirmed working end-to-end** (`backend/agent.py`, run via
+  `python backend/agent.py` with `.env` loaded): live Bedrock call + tool
+  invocation both succeeded against `us-east-1` /
+  `us.anthropic.claude-sonnet-4-5-20250929-v1:0`.
 
 ## 4. Architecture
 
