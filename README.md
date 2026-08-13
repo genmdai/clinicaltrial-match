@@ -36,8 +36,8 @@ A trial can be scientifically relevant and still be practically inaccessible.
 5. **Show the evidence** — every verdict points back to the exact trial text that supports it.
 6. **Ask targeted follow-ups** — UNKNOWN criteria become focused questions instead of a long generic intake form.
 7. **Model practical access** — considers eligibility, recruitment freshness, geography, and contactability.
-8. **Help the patient act** — surfaces recruiting sites, contacts, next steps, and draft outreach material.
-9. **Enrich site access** — Bright Data can add public hospital, sponsor, referral, and intake information for a selected trial.
+8. **Help the patient act** — surfaces recruiting sites, contacts, needed documents, next steps, and draft outreach material.
+9. **Enrich site access** — Bright Data looks up public links, such as a site's trials page or a sponsor's contact page, for a selected trial.
 
 ## Why it is different
 
@@ -92,8 +92,8 @@ Pathway does not stop at *“here are some trials.”* It asks:
       ClinicalTrials.gov                Bright Data
        source of truth                access enrichment
                 │                             │
-      eligibility / status /          hospital pages /
-      site / official contact         sponsor / referral
+      eligibility / status /          site page /
+      site / official contact         sponsor contact
                 └──────────────┬──────────────┘
                                ▼
                        Patient next steps
@@ -109,7 +109,7 @@ Pathway does not stop at *“here are some trials.”* It asks:
 | **ClinicalTrials.gov**        | Official trial data, eligibility, recruiting status, locations, and contacts |
 | **Amazon Bedrock + Strands**  | Patient-profile extraction and eligibility-criteria parsing                  |
 | **Python eligibility engine** | Deterministic PASS / FAIL / UNKNOWN evaluation and access scoring            |
-| **Bright Data**               | Supplemental public hospital, sponsor, referral, and intake information      |
+| **Bright Data**               | Public link lookup (site's trials page, sponsor's contact page) for a selected trial |
 | **React + FastAPI**           | Patient-facing experience and backend orchestration                          |
 
 ### Source-of-truth rule
@@ -150,9 +150,6 @@ npm run dev
 
 **Patient access**
 
-* Bright Data site-access enrichment
-* document-readiness checklist
-* structured Trial Access Packet
 * direct hospital/referral handoff where supported
 
 **Treatment observability**
