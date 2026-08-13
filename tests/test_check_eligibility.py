@@ -1,5 +1,5 @@
 from backend.schemas import EligibilityRule, PatientProfile, PriorTreatment
-from backend.tools.check_eligibility import evaluate
+from backend.tools.check_eligibility import evaluate, extract_marker_name
 
 
 def _rule(**kwargs) -> EligibilityRule:
@@ -78,7 +78,54 @@ def test_condition_unknown_when_missing():
     assert verdicts[0].verdict == "UNKNOWN"
 
 
+def test_condition_more_specific_subtype_is_unknown_not_fail():
+    # Real bug caught in live Phase 5 testing: a trial requiring a more specific
+    # subtype ("non-squamous NSCLC") than what's recorded ("NSCLC", no
+    # squamous/non-squamous status captured) must be UNKNOWN, not a confident
+    # FAIL — P3, the detail is unconfirmed, not contradicted.
+    verdicts, _ = evaluate(
+        [_rule(field="condition", operator="contains",
+               value="non-squamous non small cell lung carcinoma locally advanced or metastatic")],
+        _profile(condition="non-small cell lung cancer", condition_raw="advanced non-small cell lung cancer"),
+    )
+    assert verdicts[0].verdict == "UNKNOWN"
+    assert verdicts[0].follow_up_question
+
+
+def test_condition_generic_wording_is_unknown_not_fail():
+    # Real bug caught in live Phase 5 browser testing: "pathologically confirmed
+    # solid tumors" produced a confident FAIL against a recorded NSCLC diagnosis
+    # (zero keyword overlap, since the whole phrase is generic wording with no
+    # specific disease keyword) even though NSCLC obviously IS a solid tumor.
+    # Nothing specific to contradict here — must be UNKNOWN, not FAIL.
+    verdicts, _ = evaluate(
+        [_rule(field="condition", operator="contains", value="pathologically confirmed solid tumors")],
+        _profile(condition="non-small cell lung cancer", condition_raw="advanced non-small cell lung cancer"),
+    )
+    assert verdicts[0].verdict == "UNKNOWN"
+    assert verdicts[0].follow_up_question
+
+
 # --- biomarker ---
+
+def test_extract_marker_name_from_descriptive_phrase():
+    # Real bug caught in live Phase 5 testing: an answered follow-up patched
+    # "PD-L1 positive" into biomarkers, but the rule's value was the full
+    # phrase "PD-L1 expression known" — a naive full-phrase substring check
+    # never matches a short "MARKER status" entry. main.py's answer-patch and
+    # this evaluator must extract the same marker name from that phrase.
+    assert extract_marker_name("PD-L1 expression known") == "PD-L1"
+    assert extract_marker_name("germline HLA-A*02 heterozygous") == "HLA-A*02"
+    assert extract_marker_name("EGFR") == "EGFR"
+
+
+def test_biomarker_matches_on_extracted_marker_not_full_phrase():
+    verdicts, _ = evaluate(
+        [_rule(field="biomarker", operator="must_have", value="PD-L1 expression known")],
+        _profile(biomarkers=["PD-L1 positive"]),
+    )
+    assert verdicts[0].verdict == "PASS"
+
 
 def test_biomarker_unknown_when_absent():
     verdicts, _ = evaluate([_rule(field="biomarker", operator="must_have", value="EGFR")], _profile(biomarkers=[]))

@@ -65,20 +65,81 @@ def _evaluate_ecog(rule: EligibilityRule, profile: PatientProfile) -> CriterionV
     return _verdict(rule, ok, f"Patient ECOG {profile.ecog} {'meets' if ok else 'does not meet'} the requirement ({rule.operator} {rule.value}).")
 
 
+_CONDITION_GENERIC_WORDS = {
+    "cancer", "cancers", "carcinoma", "carcinomas", "tumor", "tumors", "tumour", "tumours",
+    "disease", "advanced", "metastatic", "solid", "pathologically", "confirmed", "histologically",
+    "documented", "locally", "stage", "malignancy", "malignancies", "malignant", "will", "be",
+    "enrolled", "into", "the", "study", "that", "is", "or", "and",
+}
+
+
+def _condition_tokens(text: str) -> set[str]:
+    return {w for w in re.findall(r"[a-z]+", text.lower()) if w not in _CONDITION_GENERIC_WORDS}
+
+
 def _evaluate_condition(rule: EligibilityRule, profile: PatientProfile) -> CriterionVerdict:
     text = f"{profile.condition or ''} {profile.condition_raw or ''}".strip().lower()
     if not text:
         return _unknown(rule, "Patient's diagnosed condition is not known.", "What is the patient's diagnosed condition?")
-    ok = str(rule.value).lower() in text
-    return _verdict(rule, ok, f"Patient's condition {'matches' if ok else 'does not appear to match'} the requirement ({rule.value}).")
+
+    value = str(rule.value).lower()
+    if value in text:
+        return _verdict(rule, True, f"Patient's condition matches the requirement ({rule.value}).")
+
+    # Not an exact match — before treating this as a confident FAIL, check whether
+    # the trial's condition is just a MORE SPECIFIC variant of what we know (e.g.
+    # "non-squamous NSCLC" vs a recorded "NSCLC" with no squamous/non-squamous
+    # status captured). That's genuinely unconfirmed, not contradicted — P3 says
+    # prefer UNKNOWN over a guessed FAIL when it's this ambiguous.
+    value_tokens = _condition_tokens(value)
+    text_tokens = _condition_tokens(text)
+    if not value_tokens:
+        # The trial's condition wording (e.g. "pathologically confirmed solid
+        # tumors") is entirely generic — no specific disease keyword to check
+        # against, so there's nothing to confidently contradict. A near-universal
+        # category like this almost always includes the patient's condition;
+        # asserting a FAIL here would be a confident guess with nothing behind it.
+        return _unknown(
+            rule,
+            f"Trial's condition requirement ({rule.value}) is broad/generic wording — can't confirm "
+            "or rule it out against the patient's specific diagnosis without asking.",
+            f"Can you confirm the patient's diagnosis matches: {rule.value}?",
+        )
+    overlap = value_tokens & text_tokens
+    if len(overlap) >= max(1, len(value_tokens) // 2):
+        return _unknown(
+            rule,
+            f"Patient's recorded condition ({text.strip()}) overlaps with but doesn't fully confirm the "
+            f"requirement ({rule.value}) — some detail (e.g. histology subtype) isn't captured yet.",
+            f"Can you confirm the patient's diagnosis matches: {rule.value}?",
+        )
+    return _verdict(rule, False, f"Patient's condition does not appear to match the requirement ({rule.value}).")
 
 
 def _biomarker_label(value: str) -> str:
     return value if "status" in value.lower() else f"{value} status"
 
 
+_MARKER_NAME_RE = re.compile(r"[A-Z][A-Z0-9\-*]+")
+
+
+def extract_marker_name(value: str) -> str:
+    """Pull the actual gene/biomarker name out of a rule's (often descriptive)
+    value phrase, e.g. "PD-L1 expression known" -> "PD-L1", "germline HLA-A*02
+    heterozygous" -> "HLA-A*02". Shared with main.py's answer-patch logic so a
+    biomarker written from an answered follow-up question is found by the same
+    evaluator that asked the question in the first place — otherwise a longer
+    descriptive rule.value never matches a short "MARKER status" entry.
+    """
+    match = _MARKER_NAME_RE.search(value)
+    if match:
+        return match.group()
+    tokens = value.split()
+    return tokens[0] if tokens else value
+
+
 def _evaluate_biomarker(rule: EligibilityRule, profile: PatientProfile) -> CriterionVerdict:
-    keyword = str(rule.value).lower()
+    keyword = extract_marker_name(str(rule.value)).lower()
     label = _biomarker_label(str(rule.value))
     follow_up = f"What is the patient's {label}?"
     for b in profile.biomarkers:

@@ -1,0 +1,91 @@
+.compose-drawer-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 24, 26, 0.4);
+  display: flex;
+  justify-content: flex-end;
+  z-index: 50;
+}
+
+.compose-drawer {
+  width: min(480px, 100%);
+  height: 100%;
+  background: var(--surface);
+  display: flex;
+  flex-direction: column;
+  box-shadow: var(--shadow);
+}
+
+.compose-tabs {
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding: 8px 8px 0;
+}
+
+.compose-tab {
+  background: none;
+  border: none;
+  padding: 12px 14px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--text-muted);
+  border-bottom: 2px solid transparent;
+}
+
+.compose-tab--active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+.compose-close {
+  margin-left: auto;
+  background: none;
+  border: none;
+  font-size: 20px;
+  color: var(--text-muted);
+  padding: 6px 10px;
+}
+
+.compose-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 18px 20px;
+}
+
+.compose-loading, .compose-error {
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.compose-error {
+  color: var(--fail);
+}
+
+.compose-subject {
+  font-weight: 600;
+  font-size: 13.5px;
+  margin-bottom: 10px;
+}
+
+.compose-text {
+  white-space: pre-wrap;
+  font-family: var(--sans);
+  font-size: 13.5px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 0;
+}
+
+.compose-actions {
+  display: flex;
+  gap: 10px;
+  padding: 14px 20px;
+  border-top: 1px solid var(--border);
+}
+
+.compose-actions a.btn-secondary {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}

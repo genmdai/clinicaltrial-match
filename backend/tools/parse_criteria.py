@@ -214,3 +214,31 @@ async def parse_criteria_batch(trials: list[dict]) -> dict[str, dict]:
 
     results = await asyncio.gather(*(_one(t) for t in trials[:5]))
     return dict(results)
+
+
+async def parse_criteria_stream(trials: list[dict]):
+    """Like parse_criteria_batch, but an async generator yielding (nct_id, result)
+    as each trial finishes — for progressive UI progress ("Checking eligibility
+    for NCT0512… ✓") instead of waiting for the whole batch at once.
+
+    Args:
+        trials: list of {"nct_id": str, "criteria_text": str}, capped at 5.
+
+    Yields:
+        (nct_id, {"rules": [...]}) or (nct_id, {"error": "<message>"}), in
+        completion order (not necessarily input order).
+    """
+    async def _one(trial: dict) -> tuple[str, dict]:
+        nct_id = trial["nct_id"]
+        cached = _read_cache(nct_id)
+        if cached is not None:
+            return nct_id, {"rules": cached}
+        try:
+            rules = await _parse_one_async(nct_id, trial["criteria_text"])
+            _write_cache(nct_id, rules)
+            return nct_id, {"rules": [r.model_dump() for r in rules]}
+        except Exception as e:  # noqa: BLE001 — per-trial isolation: one bad trial must not sink the stream
+            return nct_id, {"error": str(e)}
+
+    for coro in asyncio.as_completed([_one(t) for t in trials[:5]]):
+        yield await coro

@@ -46,7 +46,17 @@ def _match_summary_lines(verdicts: list[dict]) -> list[str]:
 
 
 def _open_questions(verdicts: list[dict]) -> list[str]:
-    return [v["follow_up_question"] for v in verdicts if v["verdict"] == "UNKNOWN" and v.get("follow_up_question")]
+    # Dedupe while preserving order — real trials can have dozens of low-confidence
+    # "other"-field criteria that all share the same generic follow-up question;
+    # repeating it verbatim that many times would bury the specific ones.
+    seen = set()
+    questions = []
+    for v in verdicts:
+        q = v.get("follow_up_question")
+        if v["verdict"] == "UNKNOWN" and q and q not in seen:
+            seen.add(q)
+            questions.append(q)
+    return questions
 
 
 def _contact_line(contact: dict) -> str:
