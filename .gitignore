@@ -17,7 +17,8 @@ frontend/.vite/
 !.env.example
 
 # Fixtures cache (named demo fixtures stay tracked; only the request-hash cache is ignored)
-fixtures/cache/
+fixtures/cache/*
+!fixtures/cache/.gitkeep
 
 # OS / editor
 .DS_Store

@@ -1,0 +1,1098 @@
+{
+    "protocolSection": {
+        "identificationModule": {
+            "nctId": "NCT06917079",
+            "orgStudyIdInfo": {
+                "id": "TBBO11818-101"
+            },
+            "secondaryIdInfos": [
+                {
+                    "id": "KONQUER-101",
+                    "type": "OTHER",
+                    "domain": "TheRas, Inc., d/b/a BBOT (BridgeBio Oncology Therapeutics)"
+                }
+            ],
+            "organization": {
+                "fullName": "TheRas, Inc., d/b/a BBOT (BridgeBio Oncology Therapeutics)",
+                "class": "INDUSTRY"
+            },
+            "briefTitle": "BBO-11818 in Adult Subjects With KRAS Mutant Cancer",
+            "officialTitle": "A Phase 1a/1b Open-Label Study Evaluating the Safety, Tolerability, Pharmacokinetics, and Efficacy of BBO-11818 in Subjects With Advanced KRAS Mutant Cancers"
+        },
+        "statusModule": {
+            "statusVerifiedDate": "2026-05",
+            "overallStatus": "RECRUITING",
+            "startDateStruct": {
+                "date": "2025-03-31",
+                "type": "ACTUAL"
+            },
+            "primaryCompletionDateStruct": {
+                "date": "2027-08",
+                "type": "ESTIMATED"
+            },
+            "completionDateStruct": {
+                "date": "2029-09",
+                "type": "ESTIMATED"
+            },
+            "studyFirstSubmitDate": "2025-04-01",
+            "studyFirstSubmitQcDate": "2025-04-01",
+            "studyFirstPostDateStruct": {
+                "date": "2025-04-08",
+                "type": "ACTUAL"
+            },
+            "lastUpdateSubmitDate": "2026-05-29",
+            "lastUpdatePostDateStruct": {
+                "date": "2026-06-02",
+                "type": "ACTUAL"
+            }
+        },
+        "sponsorCollaboratorsModule": {
+            "responsibleParty": {
+                "type": "SPONSOR"
+            },
+            "leadSponsor": {
+                "name": "TheRas, Inc., d/b/a BBOT (BridgeBio Oncology Therapeutics)",
+                "class": "INDUSTRY"
+            }
+        },
+        "oversightModule": {
+            "oversightHasDmc": false,
+            "isFdaRegulatedDrug": true,
+            "isFdaRegulatedDevice": false
+        },
+        "descriptionModule": {
+            "briefSummary": "A first in human study to evaluate the safety and preliminary antitumor activity of BBO-11818, a pan-KRAS inhibitor, in subjects with locally advanced unresectable or metastatic KRAS mutant solid tumors.",
+            "detailedDescription": "This is an open-label, multi-center, Phase 1 study designed to evaluate the safety, tolerability, pharmacokinetics, and efficacy of BBO-11818, a pan-KRAS inhibitor, alone and in combination with pembrolizumab, pembrolizumab + cis/carboplatin + pemetrexed, cetuximab, cetuximab + mFOLFOX6, BBO-10203 + mFOLFOX6, BBO-10203 +cetuximab, mFOLFIRINOX, gemcitabine + nab-paclitaxel, or BBO-10203 in subjects with locally advanced unresectable or metastatic KRAS mutant solid tumors. The study includes a dose escalation phase and a dose expansion phase."
+        },
+        "conditionsModule": {
+            "conditions": [
+                "Non-Small Cell Lung Cancer",
+                "NSCLC",
+                "PDAC - Pancreatic Ductal Adenocarcinoma",
+                "CRC (Colorectal Cancer)",
+                "Metastatic Non-Small Lung Cell Cancer",
+                "Metastatic Colorectal Cancer (CRC)",
+                "KRAS G12A",
+                "KRAS G12C",
+                "KRAS G12D",
+                "KRAS G12S",
+                "KRAS G12V",
+                "Metastatic Pancreatic Ductal Adenocarcinoma",
+                "Advanced Lung Carcinoma",
+                "Solid Tumor, Adult"
+            ],
+            "keywords": [
+                "BBOT",
+                "BridgeBio Oncology Therapeutics",
+                "Phase1",
+                "Phase 1a/1b",
+                "NSCLC",
+                "CRC",
+                "PDAC",
+                "Metastatic Cancer",
+                "Advanced Cancer",
+                "Pembrolizumab",
+                "Cetuximab",
+                "Platinum Chemotherapy",
+                "Pemetrexed",
+                "KONQUER",
+                "KONQUER-101",
+                "mFOLFOX6",
+                "mFOLFIRINOX",
+                "Gemcitabine",
+                "Nab-paclitaxel"
+            ]
+        },
+        "designModule": {
+            "studyType": "INTERVENTIONAL",
+            "phases": [
+                "PHASE1"
+            ],
+            "designInfo": {
+                "allocation": "NON_RANDOMIZED",
+                "interventionModel": "SEQUENTIAL",
+                "interventionModelDescription": "Phase 1a: sequential/parallel, Phase 1b: parallel",
+                "primaryPurpose": "TREATMENT",
+                "maskingInfo": {
+                    "masking": "NONE"
+                }
+            },
+            "enrollmentInfo": {
+                "count": 665,
+                "type": "ESTIMATED"
+            }
+        },
+        "armsInterventionsModule": {
+            "armGroups": [
+                {
+                    "label": "Cohort 1a - Dose Escalation Monotherapy",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 as monotherapy",
+                    "interventionNames": [
+                        "Drug: BBO-11818"
+                    ]
+                },
+                {
+                    "label": "Cohort 1b - Dose Escalation Combination Therapy (Pembrolizumab)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with pembrolizumab infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Pembrolizumab"
+                    ]
+                },
+                {
+                    "label": "Cohort 1c - Dose Escalation Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with pembrolizumab infusion (IV), cis/carboplatin infusion (IV), and pemetrexed infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Pembrolizumab",
+                        "Drug: Platinum chemotherapy (cisplatin or carboplatin)",
+                        "Drug: Pemetrexed"
+                    ]
+                },
+                {
+                    "label": "Cohort 1d - Dose Escalation Combination Therapy (Cetuximab \u00b1 mFOLFOX6)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with cetuximab infusion (IV) with or without mFOLFOX6 infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Cetuximab",
+                        "Drug: mFOLFOX6"
+                    ]
+                },
+                {
+                    "label": "Cohort 1e - Dose Escalation Combination Therapy (BBO-10203 + mFOLFOX6)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with BBO-10203 and mFOLFOX6 infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: mFOLFOX6",
+                        "Drug: BBO-10203"
+                    ]
+                },
+                {
+                    "label": "Cohort 1f - Dose Escalation Combination Therapy (BBO-10203 + Cetuximab)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with BBO-10203 and cetuximab infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Cetuximab",
+                        "Drug: BBO-10203"
+                    ]
+                },
+                {
+                    "label": "Cohort 1g - Dose Escalation Combination Therapy (Cetuximab)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with cetuximab infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Cetuximab"
+                    ]
+                },
+                {
+                    "label": "Cohort 1h - Dose Escalation Combination Therapy (mFOLFIRINOX)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with mFOLFIRINOX infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: mFOLFIRINOX"
+                    ]
+                },
+                {
+                    "label": "Cohort 1i - Dose Escalation Combination Therapy (Gemcitabine + Nab-paclitaxel)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with gemcitabine infusion (IV) and nab-paclitaxel infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Gemcitabine",
+                        "Drug: Nab-paclitaxel"
+                    ]
+                },
+                {
+                    "label": "Cohort 1j - Dose Escalation Combination Therapy (BBO-10203)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with BBO-10203",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: BBO-10203"
+                    ]
+                },
+                {
+                    "label": "Cohort 2a - Dose Expansion Monotherapy",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 as monotherapy",
+                    "interventionNames": [
+                        "Drug: BBO-11818"
+                    ]
+                },
+                {
+                    "label": "Cohort 2b - Dose Expansion Combination (Pembrolizumab)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with pembrolizumab infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Pembrolizumab"
+                    ]
+                },
+                {
+                    "label": "Cohort 2c - Dose Expansion Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with pembrolizumab infusion (IV), cis/carboplatin infusion (IV), and pemetrexed infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Pembrolizumab",
+                        "Drug: Platinum chemotherapy (cisplatin or carboplatin)",
+                        "Drug: Pemetrexed"
+                    ]
+                },
+                {
+                    "label": "Cohort 2d - Dose Expansion Combination Therapy (Cetuximab \u00b1 mFOLFOX6)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with cetuximab infusion (IV) with or without mFOLFOX6 infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Cetuximab",
+                        "Drug: mFOLFOX6"
+                    ]
+                },
+                {
+                    "label": "Cohort 2e - Dose Expansion Combination Therapy (BBO-10203 + mFOLFOX6)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with BBO-10203 and mFOLFOX6 infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: mFOLFOX6",
+                        "Drug: BBO-10203"
+                    ]
+                },
+                {
+                    "label": "Cohort 2f - Dose Expansion Combination Therapy (BBO-10203 + Cetuximab)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with BBO-10203 and cetuximab infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Cetuximab",
+                        "Drug: BBO-10203"
+                    ]
+                },
+                {
+                    "label": "Cohort 2g - Dose Expansion Combination Therapy (Cetuximab)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with cetuximab infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Cetuximab"
+                    ]
+                },
+                {
+                    "label": "Cohort 2h - Dose Expansion Combination Therapy (mFOLFIRINOX)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with mFOLFIRINOX infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: mFOLFIRINOX"
+                    ]
+                },
+                {
+                    "label": "Cohort 2i - Dose Expansion Combination Therapy (Gemcitabine + Nab-paclitaxel)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with gemcitabine infusion (IV) and nab-paclitaxel infusion (IV)",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: Gemcitabine",
+                        "Drug: Nab-paclitaxel"
+                    ]
+                },
+                {
+                    "label": "Cohort 2j - Dose Expansion Combination Therapy (BBO-10203)",
+                    "type": "EXPERIMENTAL",
+                    "description": "Participants enrolled in this cohort will receive BBO-11818 in combination with BBO-10203",
+                    "interventionNames": [
+                        "Drug: BBO-11818",
+                        "Drug: BBO-10203"
+                    ]
+                }
+            ],
+            "interventions": [
+                {
+                    "type": "DRUG",
+                    "name": "BBO-11818",
+                    "description": "Participants will receive assigned dose of BBO-11818 orally (PO)",
+                    "armGroupLabels": [
+                        "Cohort 1a - Dose Escalation Monotherapy",
+                        "Cohort 1b - Dose Escalation Combination Therapy (Pembrolizumab)",
+                        "Cohort 1c - Dose Escalation Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)",
+                        "Cohort 1d - Dose Escalation Combination Therapy (Cetuximab \u00b1 mFOLFOX6)",
+                        "Cohort 1e - Dose Escalation Combination Therapy (BBO-10203 + mFOLFOX6)",
+                        "Cohort 1f - Dose Escalation Combination Therapy (BBO-10203 + Cetuximab)",
+                        "Cohort 1g - Dose Escalation Combination Therapy (Cetuximab)",
+                        "Cohort 1h - Dose Escalation Combination Therapy (mFOLFIRINOX)",
+                        "Cohort 1i - Dose Escalation Combination Therapy (Gemcitabine + Nab-paclitaxel)",
+                        "Cohort 1j - Dose Escalation Combination Therapy (BBO-10203)",
+                        "Cohort 2a - Dose Expansion Monotherapy",
+                        "Cohort 2b - Dose Expansion Combination (Pembrolizumab)",
+                        "Cohort 2c - Dose Expansion Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)",
+                        "Cohort 2d - Dose Expansion Combination Therapy (Cetuximab \u00b1 mFOLFOX6)",
+                        "Cohort 2e - Dose Expansion Combination Therapy (BBO-10203 + mFOLFOX6)",
+                        "Cohort 2f - Dose Expansion Combination Therapy (BBO-10203 + Cetuximab)",
+                        "Cohort 2g - Dose Expansion Combination Therapy (Cetuximab)",
+                        "Cohort 2h - Dose Expansion Combination Therapy (mFOLFIRINOX)",
+                        "Cohort 2i - Dose Expansion Combination Therapy (Gemcitabine + Nab-paclitaxel)",
+                        "Cohort 2j - Dose Expansion Combination Therapy (BBO-10203)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "Pembrolizumab",
+                    "description": "Patients will receive IV pembrolizumab",
+                    "armGroupLabels": [
+                        "Cohort 1b - Dose Escalation Combination Therapy (Pembrolizumab)",
+                        "Cohort 1c - Dose Escalation Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)",
+                        "Cohort 2b - Dose Expansion Combination (Pembrolizumab)",
+                        "Cohort 2c - Dose Expansion Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "Platinum chemotherapy (cisplatin or carboplatin)",
+                    "description": "Patients will receive IV platinum chemotherapy (cisplatin or carboplatin)",
+                    "armGroupLabels": [
+                        "Cohort 1c - Dose Escalation Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)",
+                        "Cohort 2c - Dose Expansion Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "Pemetrexed",
+                    "description": "Patients will receive IV pemetrexed",
+                    "armGroupLabels": [
+                        "Cohort 1c - Dose Escalation Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)",
+                        "Cohort 2c - Dose Expansion Combination Therapy (Pembrolizumab + Cis/carboplatin + Pemetrexed)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "Cetuximab",
+                    "description": "Patients will receive IV cetuximab",
+                    "armGroupLabels": [
+                        "Cohort 1d - Dose Escalation Combination Therapy (Cetuximab \u00b1 mFOLFOX6)",
+                        "Cohort 1f - Dose Escalation Combination Therapy (BBO-10203 + Cetuximab)",
+                        "Cohort 1g - Dose Escalation Combination Therapy (Cetuximab)",
+                        "Cohort 2d - Dose Expansion Combination Therapy (Cetuximab \u00b1 mFOLFOX6)",
+                        "Cohort 2f - Dose Expansion Combination Therapy (BBO-10203 + Cetuximab)",
+                        "Cohort 2g - Dose Expansion Combination Therapy (Cetuximab)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "mFOLFOX6",
+                    "description": "Patients may receive IV mFOLFOX6",
+                    "armGroupLabels": [
+                        "Cohort 1d - Dose Escalation Combination Therapy (Cetuximab \u00b1 mFOLFOX6)",
+                        "Cohort 2d - Dose Expansion Combination Therapy (Cetuximab \u00b1 mFOLFOX6)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "mFOLFOX6",
+                    "description": "Patients will receive IV mFOLFOX6",
+                    "armGroupLabels": [
+                        "Cohort 1e - Dose Escalation Combination Therapy (BBO-10203 + mFOLFOX6)",
+                        "Cohort 2e - Dose Expansion Combination Therapy (BBO-10203 + mFOLFOX6)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "BBO-10203",
+                    "description": "Participants will receive BBO-10203 orally (PO)",
+                    "armGroupLabels": [
+                        "Cohort 1e - Dose Escalation Combination Therapy (BBO-10203 + mFOLFOX6)",
+                        "Cohort 1f - Dose Escalation Combination Therapy (BBO-10203 + Cetuximab)",
+                        "Cohort 1j - Dose Escalation Combination Therapy (BBO-10203)",
+                        "Cohort 2e - Dose Expansion Combination Therapy (BBO-10203 + mFOLFOX6)",
+                        "Cohort 2f - Dose Expansion Combination Therapy (BBO-10203 + Cetuximab)",
+                        "Cohort 2j - Dose Expansion Combination Therapy (BBO-10203)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "mFOLFIRINOX",
+                    "description": "Patients will receive IV mFOLFIRINOX",
+                    "armGroupLabels": [
+                        "Cohort 1h - Dose Escalation Combination Therapy (mFOLFIRINOX)",
+                        "Cohort 2h - Dose Expansion Combination Therapy (mFOLFIRINOX)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "Gemcitabine",
+                    "description": "Patients will receive IV gemcitabine",
+                    "armGroupLabels": [
+                        "Cohort 1i - Dose Escalation Combination Therapy (Gemcitabine + Nab-paclitaxel)",
+                        "Cohort 2i - Dose Expansion Combination Therapy (Gemcitabine + Nab-paclitaxel)"
+                    ]
+                },
+                {
+                    "type": "DRUG",
+                    "name": "Nab-paclitaxel",
+                    "description": "Patients will receive IV nab-paclitaxel",
+                    "armGroupLabels": [
+                        "Cohort 1i - Dose Escalation Combination Therapy (Gemcitabine + Nab-paclitaxel)",
+                        "Cohort 2i - Dose Expansion Combination Therapy (Gemcitabine + Nab-paclitaxel)"
+                    ]
+                }
+            ]
+        },
+        "outcomesModule": {
+            "primaryOutcomes": [
+                {
+                    "measure": "Incidence and severity of treatment emergent adverse events (TEAEs), serious adverse events (SAEs), and dose-limiting toxicities (DLTs)",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Determine recommended dose of BBO-11818 in combination with pembrolizumab \u00b1 cis/carboplatin + pemetrexed, cetuximab \u00b1 mFOLFOX6, BBO-10203 + mFOLFOX6, BBO-10203 + cetuximab, cetuximab, mFOLFIRINOX, gemcitabine + nab-paclitaxel, or BBO-10203",
+                    "timeFrame": "approximately 5 years"
+                }
+            ],
+            "secondaryOutcomes": [
+                {
+                    "measure": "Objective response rate (ORR) per RECIST v1.1 and CNS RECIST",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Clinical benefit rate (CBR) per RECIST v1.1",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Duration of Response (DOR) per RECIST v1.1",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Progression-Free Survival (PFS) per RECIST v1.1",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Overall Survival (OS)",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Pharmacokinetics of BBO-11818, BBO-10203, irinotecan, and its metabolites (SN-38 and SN-38-G): Maximum blood concentration (Cmax)",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Pharmacokinetics of BBO-11818, BBO-10203, irinotecan, and its metabolites (SN-38 and SN-38-G): Time to achieve maximum concentration (Tmax)",
+                    "timeFrame": "approximately 5 years"
+                },
+                {
+                    "measure": "Pharmacokinetics of BBO-11818, BBO-10203, irinotecan, and its metabolites (SN-38 and SN-38-G): Area under the concentration-time curve (AUC)",
+                    "timeFrame": "approximately 5 years"
+                }
+            ]
+        },
+        "eligibilityModule": {
+            "eligibilityCriteria": "Inclusion Criteria:\n\n* Histologically documented locally advanced and unresectable or metastatic NSCLC, PDAC, CRC, or other solid tumor with KRAS G12A, G12C, G12D, G12S, or G12V mutation\n* Measurable disease by RECIST v1.1\n* Eastern Cooperative Oncology Group (ECOG) performance status (PS) 0-1\n* Life expectancy \\>24 weeks\n* Adequate organ function\n\nExclusion Criteria:\n\n* Malignancy within the last 2 years as specified in the protocol\n* Untreated brain metastases\n\nOther inclusion/exclusion criteria are specified in the protocol.",
+            "healthyVolunteers": false,
+            "sex": "ALL",
+            "minimumAge": "18 Years",
+            "stdAges": [
+                "ADULT",
+                "OLDER_ADULT"
+            ]
+        },
+        "contactsLocationsModule": {
+            "centralContacts": [
+                {
+                    "name": "TheRas, Inc., d/b/a BBOT (BridgeBio Oncology Therapeutics)",
+                    "role": "CONTACT",
+                    "phone": "(650) 405-4770",
+                    "email": "tbbo11818-101ct.gov@bbotx.com"
+                }
+            ],
+            "locations": [
+                {
+                    "facility": "The Angeles Clinic and Research Institute - West Los Angeles Office",
+                    "status": "RECRUITING",
+                    "city": "Los Angeles",
+                    "state": "California",
+                    "zip": "90025",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "310-582-7900"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 34.05223,
+                        "lon": -118.24368
+                    }
+                },
+                {
+                    "facility": "University of California Davis",
+                    "status": "RECRUITING",
+                    "city": "Sacramento",
+                    "state": "California",
+                    "zip": "95817",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "916-734-5959"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 38.58157,
+                        "lon": -121.4944
+                    }
+                },
+                {
+                    "facility": "University of California San Diego Moores Cancer Center",
+                    "status": "RECRUITING",
+                    "city": "San Diego",
+                    "state": "California",
+                    "zip": "92037",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "858-822-6100"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 32.71571,
+                        "lon": -117.16472
+                    }
+                },
+                {
+                    "facility": "University of California San Francisco Helen Diller Family Comprehensive Cancer Center",
+                    "status": "RECRUITING",
+                    "city": "San Francisco",
+                    "state": "California",
+                    "zip": "94158",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "415-885-7796"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 37.77493,
+                        "lon": -122.41942
+                    }
+                },
+                {
+                    "facility": "Yale University",
+                    "status": "RECRUITING",
+                    "city": "New Haven",
+                    "state": "Connecticut",
+                    "zip": "06510",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "203-200-2486"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 41.30815,
+                        "lon": -72.92816
+                    }
+                },
+                {
+                    "facility": "Moffitt Cancer Center",
+                    "status": "RECRUITING",
+                    "city": "Tampa",
+                    "state": "Florida",
+                    "zip": "33612",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "888-663-3488"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 27.94752,
+                        "lon": -82.45843
+                    }
+                },
+                {
+                    "facility": "OSF Healthcare Cancer Institute",
+                    "status": "RECRUITING",
+                    "city": "Peoria",
+                    "state": "Illinois",
+                    "zip": "61637",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "309-308-3800"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 40.69365,
+                        "lon": -89.58899
+                    }
+                },
+                {
+                    "facility": "Massachusetts General Hospital",
+                    "status": "RECRUITING",
+                    "city": "Boston",
+                    "state": "Massachusetts",
+                    "zip": "02114",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "617-724-4000"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 42.35843,
+                        "lon": -71.05977
+                    }
+                },
+                {
+                    "facility": "NYU Langone Health",
+                    "status": "RECRUITING",
+                    "city": "New York",
+                    "state": "New York",
+                    "zip": "10016",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "646-929-7870"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 40.71427,
+                        "lon": -74.00597
+                    }
+                },
+                {
+                    "facility": "Columbia University Irving Medical Center",
+                    "status": "RECRUITING",
+                    "city": "New York",
+                    "state": "New York",
+                    "zip": "10032",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "877-426-5637"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 40.71427,
+                        "lon": -74.00597
+                    }
+                },
+                {
+                    "facility": "Vanderbilt University Medical Center",
+                    "status": "RECRUITING",
+                    "city": "Nashville",
+                    "state": "Tennessee",
+                    "zip": "37232",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "615-936-8422"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 36.16589,
+                        "lon": -86.78444
+                    }
+                },
+                {
+                    "facility": "Sarah Cannon Research Institute at Mary Crowley",
+                    "status": "RECRUITING",
+                    "city": "Dallas",
+                    "state": "Texas",
+                    "zip": "75230",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "972-566-3000"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 32.78306,
+                        "lon": -96.80667
+                    }
+                },
+                {
+                    "facility": "The University of Texas MD Anderson Cancer Center",
+                    "status": "RECRUITING",
+                    "city": "Houston",
+                    "state": "Texas",
+                    "zip": "77030",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "877-632-6789"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 29.76328,
+                        "lon": -95.36327
+                    }
+                },
+                {
+                    "facility": "NEXT Oncology",
+                    "status": "RECRUITING",
+                    "city": "San Antonio",
+                    "state": "Texas",
+                    "zip": "78229",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "210-580-9500"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 29.42412,
+                        "lon": -98.49363
+                    }
+                },
+                {
+                    "facility": "Huntsman Cancer Institute",
+                    "status": "RECRUITING",
+                    "city": "Salt Lake City",
+                    "state": "Utah",
+                    "zip": "84112",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "801-587-7000"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 40.76078,
+                        "lon": -111.89105
+                    }
+                },
+                {
+                    "facility": "Fred Hutchinson Cancer Center",
+                    "status": "RECRUITING",
+                    "city": "Seattle",
+                    "state": "Washington",
+                    "zip": "98109",
+                    "country": "United States",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "206-667-5000"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": 47.60621,
+                        "lon": -122.33207
+                    }
+                },
+                {
+                    "facility": "Peter MacCallum Cancer Centre",
+                    "status": "RECRUITING",
+                    "city": "Melbourne",
+                    "state": "Victoria",
+                    "zip": "3000",
+                    "country": "Australia",
+                    "contacts": [
+                        {
+                            "role": "CONTACT",
+                            "phone": "03-8559-5000"
+                        }
+                    ],
+                    "geoPoint": {
+                        "lat": -37.814,
+                        "lon": 144.96332
+                    }
+                }
+            ]
+        },
+        "referencesModule": {
+            "references": [
+                {
+                    "pmid": "41790032",
+                    "type": "DERIVED",
+                    "citation": "Stahlhut C, Maciag AE, Sullivan KA, Singh K, Gitego N, Zhang Z, Chan AH, Sharma AK, Alexander PA, Shu J, Yang Y, Rigby M, Ma R, Setoodeh S, Smith BP, Pei J, Rabara D, Larsen EK, Turner DM, Zhang C, Feng C, Feng S, Stice JP, Xu R, Lin K, Stephen AG, Lightstone FC, Ji C, Wang K, Simanshu DK, Nissley DV, Wallace E, Wang B, Sinkevicius KW, McCormick F, Beltran PJ. Discovery of BBO-11818, a Potent and Selective Noncovalent Inhibitor of (ON) and (OFF) KRAS with Activity against Multiple Oncogenic Mutants. Cancer Discov. 2026 Apr 1;16(4):740-759. doi: 10.1158/2159-8290.CD-25-1280."
+                }
+            ]
+        }
+    },
+    "derivedSection": {
+        "miscInfoModule": {
+            "versionHolder": "2026-08-13"
+        },
+        "conditionBrowseModule": {
+            "meshes": [
+                {
+                    "id": "D002289",
+                    "term": "Carcinoma, Non-Small-Cell Lung"
+                },
+                {
+                    "id": "D015179",
+                    "term": "Colorectal Neoplasms"
+                },
+                {
+                    "id": "D009362",
+                    "term": "Neoplasm Metastasis"
+                }
+            ],
+            "ancestors": [
+                {
+                    "id": "D002283",
+                    "term": "Carcinoma, Bronchogenic"
+                },
+                {
+                    "id": "D001984",
+                    "term": "Bronchial Neoplasms"
+                },
+                {
+                    "id": "D008175",
+                    "term": "Lung Neoplasms"
+                },
+                {
+                    "id": "D012142",
+                    "term": "Respiratory Tract Neoplasms"
+                },
+                {
+                    "id": "D013899",
+                    "term": "Thoracic Neoplasms"
+                },
+                {
+                    "id": "D009371",
+                    "term": "Neoplasms by Site"
+                },
+                {
+                    "id": "D009369",
+                    "term": "Neoplasms"
+                },
+                {
+                    "id": "D008171",
+                    "term": "Lung Diseases"
+                },
+                {
+                    "id": "D012140",
+                    "term": "Respiratory Tract Diseases"
+                },
+                {
+                    "id": "D007414",
+                    "term": "Intestinal Neoplasms"
+                },
+                {
+                    "id": "D005770",
+                    "term": "Gastrointestinal Neoplasms"
+                },
+                {
+                    "id": "D004067",
+                    "term": "Digestive System Neoplasms"
+                },
+                {
+                    "id": "D004066",
+                    "term": "Digestive System Diseases"
+                },
+                {
+                    "id": "D005767",
+                    "term": "Gastrointestinal Diseases"
+                },
+                {
+                    "id": "D003108",
+                    "term": "Colonic Diseases"
+                },
+                {
+                    "id": "D007410",
+                    "term": "Intestinal Diseases"
+                },
+                {
+                    "id": "D012002",
+                    "term": "Rectal Diseases"
+                },
+                {
+                    "id": "D009385",
+                    "term": "Neoplastic Processes"
+                },
+                {
+                    "id": "D010335",
+                    "term": "Pathologic Processes"
+                },
+                {
+                    "id": "D013568",
+                    "term": "Pathological Conditions, Signs and Symptoms"
+                }
+            ]
+        },
+        "interventionBrowseModule": {
+            "meshes": [
+                {
+                    "id": "C582435",
+                    "term": "pembrolizumab"
+                },
+                {
+                    "id": "D002945",
+                    "term": "Cisplatin"
+                },
+                {
+                    "id": "D016190",
+                    "term": "Carboplatin"
+                },
+                {
+                    "id": "D000068437",
+                    "term": "Pemetrexed"
+                },
+                {
+                    "id": "D000068818",
+                    "term": "Cetuximab"
+                },
+                {
+                    "id": "D000093542",
+                    "term": "Gemcitabine"
+                },
+                {
+                    "id": "C520255",
+                    "term": "130-nm albumin-bound paclitaxel"
+                }
+            ],
+            "ancestors": [
+                {
+                    "id": "D017606",
+                    "term": "Chlorine Compounds"
+                },
+                {
+                    "id": "D007287",
+                    "term": "Inorganic Chemicals"
+                },
+                {
+                    "id": "D017672",
+                    "term": "Nitrogen Compounds"
+                },
+                {
+                    "id": "D017671",
+                    "term": "Platinum Compounds"
+                },
+                {
+                    "id": "D056831",
+                    "term": "Coordination Complexes"
+                },
+                {
+                    "id": "D009930",
+                    "term": "Organic Chemicals"
+                },
+                {
+                    "id": "D006147",
+                    "term": "Guanine"
+                },
+                {
+                    "id": "D007042",
+                    "term": "Hypoxanthines"
+                },
+                {
+                    "id": "D011688",
+                    "term": "Purinones"
+                },
+                {
+                    "id": "D011687",
+                    "term": "Purines"
+                },
+                {
+                    "id": "D006574",
+                    "term": "Heterocyclic Compounds, 2-Ring"
+                },
+                {
+                    "id": "D000072471",
+                    "term": "Heterocyclic Compounds, Fused-Ring"
+                },
+                {
+                    "id": "D006571",
+                    "term": "Heterocyclic Compounds"
+                },
+                {
+                    "id": "D005971",
+                    "term": "Glutamates"
+                },
+                {
+                    "id": "D024342",
+                    "term": "Amino Acids, Acidic"
+                },
+                {
+                    "id": "D000596",
+                    "term": "Amino Acids"
+                },
+                {
+                    "id": "D000602",
+                    "term": "Amino Acids, Peptides, and Proteins"
+                },
+                {
+                    "id": "D000600",
+                    "term": "Amino Acids, Dicarboxylic"
+                },
+                {
+                    "id": "D061067",
+                    "term": "Antibodies, Monoclonal, Humanized"
+                },
+                {
+                    "id": "D000911",
+                    "term": "Antibodies, Monoclonal"
+                },
+                {
+                    "id": "D000906",
+                    "term": "Antibodies"
+                },
+                {
+                    "id": "D007136",
+                    "term": "Immunoglobulins"
+                },
+                {
+                    "id": "D007162",
+                    "term": "Immunoproteins"
+                },
+                {
+                    "id": "D001798",
+                    "term": "Blood Proteins"
+                },
+                {
+                    "id": "D011506",
+                    "term": "Proteins"
+                },
+                {
+                    "id": "D012712",
+                    "term": "Serum Globulins"
+                },
+                {
+                    "id": "D005916",
+                    "term": "Globulins"
+                },
+                {
+                    "id": "D003841",
+                    "term": "Deoxycytidine"
+                },
+                {
+                    "id": "D003562",
+                    "term": "Cytidine"
+                },
+                {
+                    "id": "D011741",
+                    "term": "Pyrimidine Nucleosides"
+                },
+                {
+                    "id": "D011743",
+                    "term": "Pyrimidines"
+                },
+                {
+                    "id": "D006573",
+                    "term": "Heterocyclic Compounds, 1-Ring"
+                }
+            ]
+        }
+    },
+    "hasResults": false
+}
