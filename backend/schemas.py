@@ -24,6 +24,8 @@ class PatientProfile(BaseModel):
     biomarkers: list[str] = []
     prior_treatments: list[PriorTreatment] = []
     treatment_line: int | None = None
+    ecog: int | None = None
+    comorbidities: list[str] = []
     location_zip: str | None = None
     assumptions: list[str] = []
 

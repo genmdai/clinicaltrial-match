@@ -203,6 +203,12 @@ class PatientProfile(BaseModel):
     biomarkers: list[str]       # e.g. ["EGFR unknown"] — keep unknowns explicit
     prior_treatments: list[PriorTreatment]
     treatment_line: int | None  # inferred count of prior lines
+    ecog: int | None            # added Phase 2 — EligibilityRule.field already listed
+                                 # "ecog" in its vocab and eval case 10 needs it
+                                 # captured, but the original draft never added it here
+    comorbidities: list[str]    # added Phase 2 — eval case 8 ("naive BUT comorbidity
+                                 # captured, feeds an exclusion later") needs somewhere
+                                 # to land; "other"-field exclusions in Phase 3 read this
     location_zip: str | None
     assumptions: list[str]      # human-readable inferred statements for the card
 

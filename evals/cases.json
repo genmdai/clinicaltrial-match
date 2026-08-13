@@ -1,1 +1,120 @@
-[]
+[
+  {
+    "id": 1,
+    "stage": "extraction",
+    "narrative": "my mom's been on Keytruda for a year and it stopped working, she's 68",
+    "expect": {
+      "subject": "relative",
+      "age": 68,
+      "treatment_line_min": 1,
+      "prior_treatment_contains": {
+        "drug_generic": "pembrolizumab",
+        "drug_class_keyword": "PD-1",
+        "outcome": "progression",
+        "inferred": true
+      }
+    }
+  },
+  {
+    "id": 2,
+    "stage": "extraction",
+    "narrative": "62, lung cancer, nothing yet",
+    "expect": {
+      "treatment_line": 0,
+      "prior_treatments_empty": true
+    }
+  },
+  {
+    "id": 3,
+    "stage": "extraction",
+    "narrative": "I have stage 4 NSCLC, EGFR positive, failed Tagrisso",
+    "expect": {
+      "biomarker_keyword": "EGFR",
+      "prior_treatment_contains": {
+        "drug_generic": "osimertinib",
+        "outcome": "progression"
+      }
+    }
+  },
+  {
+    "id": 4,
+    "stage": "extraction",
+    "narrative": "dad, 71, prostate cancer, on hormone therapy, PSA rising",
+    "expect": {
+      "subject": "relative",
+      "age": 71,
+      "prior_treatment_contains": {
+        "drug_class_any": ["ADT", "androgen"],
+        "outcome": "progression",
+        "inferred": true
+      }
+    }
+  },
+  {
+    "id": 5,
+    "stage": "extraction",
+    "narrative": "I'm 45, triple negative breast cancer, did chemo and immunotherapy, both stopped helping",
+    "expect": {
+      "treatment_line": 2,
+      "prior_treatments_count": 2,
+      "class_keywords_present": ["chemo", ["checkpoint", "immunotherapy", "immune"]]
+    }
+  },
+  {
+    "id": 6,
+    "stage": "extraction",
+    "narrative": "my sister has SMA type 2, she's 9, on Spinraza",
+    "expect": {
+      "subject": "relative",
+      "age": 9,
+      "prior_treatment_contains": {
+        "drug_generic": "nusinersen",
+        "outcome": "ongoing"
+      }
+    }
+  },
+  {
+    "id": 7,
+    "stage": "extraction",
+    "narrative": "I've been on keitruda for 6 months and my scans got worse",
+    "expect": {
+      "prior_treatment_contains": {
+        "drug_generic": "pembrolizumab",
+        "confidence": "high"
+      }
+    }
+  },
+  {
+    "id": 8,
+    "stage": "extraction",
+    "narrative": "68 year old never treated for her melanoma but has bad heart failure",
+    "expect": {
+      "age": 68,
+      "treatment_line": 0,
+      "prior_treatments_empty": true,
+      "comorbidities_keyword": "heart"
+    }
+  },
+  {
+    "id": 9,
+    "stage": "extraction",
+    "narrative": "grandma is sick with cancer",
+    "expect": {
+      "subject": "relative",
+      "age_null": true,
+      "condition_null": true,
+      "prior_treatments_empty": true,
+      "assumptions_nonempty": true
+    }
+  },
+  {
+    "id": 10,
+    "stage": "extraction",
+    "narrative": "I progressed on two lines of platinum chemo, ECOG 1, 55F",
+    "expect": {
+      "treatment_line": 2,
+      "ecog": 1,
+      "sex_prefix": "f"
+    }
+  }
+]
