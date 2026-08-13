@@ -4,7 +4,12 @@ covered by evals/run_evals.py --stage extraction (needs live Bedrock).
 """
 
 from backend.schemas import PatientProfile, PriorTreatment
-from backend.tools.extract_profile import _guess_subject, _match_drug, _reconcile
+from backend.tools.extract_profile import (
+    _guess_relation,
+    _guess_subject,
+    _match_drug,
+    _reconcile,
+)
 
 
 def test_match_drug_exact_brand():
@@ -63,3 +68,25 @@ def test_reconcile_normalizes_bad_subject_value():
     reconciled = _reconcile(profile, "my mom is sick")
 
     assert reconciled.subject == "relative"
+
+
+def test_guess_relation_mom_normalizes_to_mother():
+    assert _guess_relation("my mom's been on Keytruda") == "mother"
+
+
+def test_guess_relation_none_when_no_relation_word():
+    assert _guess_relation("I've been on Keytruda") is None
+
+
+def test_reconcile_fills_missing_relation_when_relative():
+    profile = PatientProfile(subject="relative", relation=None, prior_treatments=[])
+    reconciled = _reconcile(profile, "my dad has prostate cancer")
+
+    assert reconciled.relation == "father"
+
+
+def test_reconcile_forces_relation_null_when_self():
+    profile = PatientProfile(subject="self", relation="mother", prior_treatments=[])
+    reconciled = _reconcile(profile, "I have lung cancer")
+
+    assert reconciled.relation is None

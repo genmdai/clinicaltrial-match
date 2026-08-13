@@ -15,7 +15,7 @@ FRESH_STATUS = {
     "lastUpdatePostDateStruct": {"date": "2026-07-01"},
     "primaryCompletionDateStruct": {"date": "2027-08"},
 }
-EMAIL_CONTACT = [{"name": "Jane Doe", "role": "CONTACT", "email": "jane@example.com"}]
+EMAIL_CONTACT = {"name": "Jane Doe", "role": "CONTACT", "email": "jane@example.com", "contact_source": "central_contact"}
 
 
 def _v(**kwargs) -> CriterionVerdict:
@@ -127,20 +127,22 @@ def test_geo_ignores_non_recruiting_sites():
 # --- contactability ---
 
 def test_contact_strong_with_email():
-    assert _contactability(EMAIL_CONTACT, []).band == "strong"
+    assert _contactability(EMAIL_CONTACT).band == "strong"
 
 
 def test_contact_fair_with_phone_only():
-    assert _contactability([{"name": "Jane", "phone": "555-1234"}], []).band == "fair"
+    contact = {"name": "Jane", "phone": "555-1234", "contact_source": "central_contact"}
+    assert _contactability(contact).band == "fair"
 
 
 def test_contact_fair_with_site_contact_only():
-    locations = [{"facility": "Site A", "contacts": [{"phone": "555-1234"}]}]
-    assert _contactability([], locations).band == "fair"
+    contact = {"name": None, "phone": "555-1234", "contact_source": "site_contact", "facility": "Site A"}
+    assert _contactability(contact).band == "fair"
 
 
 def test_contact_weak_with_none():
-    assert _contactability([], []).band == "weak"
+    contact = {"name": "Some Sponsor Inc.", "role": None, "phone": None, "email": None, "contact_source": "sponsor_only"}
+    assert _contactability(contact).band == "weak"
 
 
 # --- P9: never a percentage ---
@@ -148,7 +150,7 @@ def test_contact_weak_with_none():
 def test_outlook_caveat_present_and_no_component_exposes_score_in_evidence_text():
     outlook = compute_access_outlook(
         nct_id="NCT0", verdicts=[_v()], status_module=FRESH_STATUS,
-        locations=[NEARBY_SITE], central_contacts=EMAIL_CONTACT,
+        locations=[NEARBY_SITE], contact=EMAIL_CONTACT,
         patient_lat=COLUMBUS[0], patient_lon=COLUMBUS[1],
     )
     assert "not a probability" in outlook.caveat
@@ -168,7 +170,7 @@ def test_scenario_a_keytruda_mom_vs_naive_required_is_blocked():
     ]
     outlook = compute_access_outlook(
         nct_id="NCT-NAIVE", verdicts=verdicts, status_module=FRESH_STATUS,
-        locations=[NEARBY_SITE], central_contacts=EMAIL_CONTACT,
+        locations=[NEARBY_SITE], contact=EMAIL_CONTACT,
         patient_lat=COLUMBUS[0], patient_lon=COLUMBUS[1],
     )
     assert outlook.tier == "Blocked"
@@ -189,7 +191,7 @@ def test_scenario_b_two_open_questions_is_moderate():
     ]
     outlook = compute_access_outlook(
         nct_id="NCT-IO", verdicts=verdicts, status_module=FRESH_STATUS,
-        locations=[NEARBY_SITE], central_contacts=EMAIL_CONTACT,
+        locations=[NEARBY_SITE], contact=EMAIL_CONTACT,
         patient_lat=COLUMBUS[0], patient_lon=COLUMBUS[1],
     )
     assert outlook.tier == "Moderate"
@@ -207,7 +209,7 @@ def test_scenario_c_answering_open_questions_recomputes_to_high():
     ]
     outlook = compute_access_outlook(
         nct_id="NCT-IO", verdicts=verdicts, status_module=FRESH_STATUS,
-        locations=[NEARBY_SITE], central_contacts=EMAIL_CONTACT,
+        locations=[NEARBY_SITE], contact=EMAIL_CONTACT,
         patient_lat=COLUMBUS[0], patient_lon=COLUMBUS[1],
     )
     assert outlook.tier == "High"

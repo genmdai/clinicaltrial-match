@@ -16,6 +16,9 @@ class PriorTreatment(BaseModel):
 
 class PatientProfile(BaseModel):
     subject: str  # "self" | "relative"
+    relation: str | None = None  # "mother" | "father" | "sister" | ... — only set
+    # when subject=="relative"; added Phase 4 for compose.py's "on behalf of my
+    # mother" voice (CLAUDE.md Phase 4 demo script line)
     age: int | None = None
     sex: str | None = None
     condition: str | None = None

@@ -33,6 +33,10 @@ matching tool. Follow these rules exactly:
 
 - subject: exactly "self" or "relative" — "relative" whenever the narrative is about \
 someone else (mom, dad, sister, grandma, ...), "self" whenever the speaker is the patient.
+- relation: only when subject=="relative", a single lowercase word for which relative \
+("mother", "father", "sister", "brother", "grandmother", "grandfather", "wife", \
+"husband", "daughter", "son", "friend", ...) — normalize "mom"->"mother", "dad"-> \
+"father", etc. null when subject=="self".
 - age, sex, condition, condition_raw, location_zip: leave null if not mentioned. Do \
 NOT guess or fabricate. condition_raw is the patient's own words; condition is your \
 normalized version (e.g. "non-small cell lung cancer") — leave condition null if you \
@@ -80,7 +84,7 @@ always better than a guess.
 
 --- Worked example 1 (third person, clear progression) ---
 Narrative: "my mom's been on Keytruda for a year and it stopped working, she's 68"
-subject="relative", age=68, sex="female", prior_treatments=[{raw_mention: "Keytruda \
+subject="relative", relation="mother", age=68, sex="female", prior_treatments=[{raw_mention: "Keytruda \
 for a year", drug_brand: "Keytruda", drug_generic: "pembrolizumab", drug_class: \
 "anti-PD-1 checkpoint inhibitor", outcome: "progression", inferred: true, confidence: \
 "high"}], treatment_line=1, assumptions=["'Mom' means this is about the user's \
@@ -89,7 +93,7 @@ Keytruda."]
 
 --- Worked example 2 (misspelled drug, self) ---
 Narrative: "I've been on keitruda for 6 months and my scans got worse"
-subject="self", prior_treatments=[{raw_mention: "keitruda for 6 months", drug_brand: \
+subject="self", relation=null, prior_treatments=[{raw_mention: "keitruda for 6 months", drug_brand: \
 "Keytruda", drug_generic: "pembrolizumab", drug_class: "anti-PD-1 checkpoint \
 inhibitor", outcome: "progression", inferred: true, confidence: "high"}], \
 treatment_line=1, assumptions=["Interpreted 'keitruda' as a likely misspelling of \
@@ -97,7 +101,7 @@ Keytruda.", "Interpreted 'scans got worse' as disease progression."]
 
 --- Worked example 3 (adversarial vagueness — mostly nulls) ---
 Narrative: "grandma is sick with cancer"
-subject="relative", age=null, sex=null, condition=null, condition_raw="cancer", \
+subject="relative", relation="grandmother", age=null, sex=null, condition=null, condition_raw="cancer", \
 biomarkers=[], prior_treatments=[], treatment_line=null, assumptions=["Condition is \
 only described as 'cancer' with no type, stage, or treatment history given — treated \
 as unknown rather than guessed.", "Follow-up needed: what type of cancer, and has she \
@@ -137,6 +141,26 @@ def _guess_subject(narrative: str) -> str:
     return "relative" if any(w in lower for w in _RELATIVE_WORDS) else "self"
 
 
+_RELATION_ALIASES = {
+    "mom": "mother", "mother": "mother",
+    "dad": "father", "father": "father",
+    "sister": "sister", "brother": "brother",
+    "grandma": "grandmother", "grandmother": "grandmother",
+    "grandpa": "grandfather", "grandfather": "grandfather",
+    "wife": "wife", "husband": "husband", "spouse": "spouse",
+    "son": "son", "daughter": "daughter",
+    "aunt": "aunt", "uncle": "uncle", "cousin": "cousin", "friend": "friend",
+}
+
+
+def _guess_relation(narrative: str) -> str | None:
+    lower = narrative.lower()
+    for word, normalized in _RELATION_ALIASES.items():
+        if word in lower:
+            return normalized
+    return None
+
+
 def _reconcile(profile: PatientProfile, narrative: str) -> PatientProfile:
     extra_assumptions = []
     reconciled: list[PriorTreatment] = []
@@ -162,6 +186,7 @@ def _reconcile(profile: PatientProfile, narrative: str) -> PatientProfile:
         reconciled.append(pt)
 
     subject = profile.subject if profile.subject in ("self", "relative") else _guess_subject(narrative)
+    relation = (profile.relation or _guess_relation(narrative)) if subject == "relative" else None
 
     treatment_line = profile.treatment_line
     if treatment_line is None and reconciled:
@@ -170,6 +195,7 @@ def _reconcile(profile: PatientProfile, narrative: str) -> PatientProfile:
     return profile.model_copy(update={
         "prior_treatments": reconciled,
         "subject": subject,
+        "relation": relation,
         "treatment_line": treatment_line,
         "assumptions": [*profile.assumptions, *extra_assumptions],
     })

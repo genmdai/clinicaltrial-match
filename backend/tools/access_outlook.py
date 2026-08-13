@@ -14,6 +14,7 @@ from datetime import date, datetime
 from strands import tool
 
 from ..schemas import AccessOutlook, CriterionVerdict, OutlookComponent
+from .fetch_trial import get_contact
 from .geo import haversine_miles
 
 _SCORE_BY_BAND = {"strong": 1.0, "fair": 0.6, "weak": 0.2}
@@ -149,29 +150,28 @@ def _geographic_access(
     return OutlookComponent(name="geographic_access", score=_SCORE_BY_BAND[band], band=band, evidence=evidence)
 
 
-def _contactability(central_contacts: list[dict], locations: list[dict]) -> OutlookComponent:
-    for c in central_contacts:
-        if c.get("email"):
-            return OutlookComponent(
-                name="contactability", score=1.0, band="strong",
-                evidence=[f"Central trial contact available with email ({c.get('name', 'contact')})."],
-            )
-    for c in central_contacts:
-        if c.get("phone"):
-            return OutlookComponent(
-                name="contactability", score=0.6, band="fair",
-                evidence=[f"Central trial contact available by phone only ({c.get('name', 'contact')})."],
-            )
-    for loc in locations:
-        for c in loc.get("contacts", []):
-            if c.get("email") or c.get("phone"):
-                return OutlookComponent(
-                    name="contactability", score=0.6, band="fair",
-                    evidence=[f"Site-level contact available at {loc.get('facility', 'a trial site')}."],
-                )
+def _contactability(contact: dict) -> OutlookComponent:
+    """Bands per CLAUDE.md Phase 4: central contact with email -> strong;
+    phone-only or site-contact-only -> fair; sponsor/name-only -> weak. Reuses
+    fetch_trial.get_contact()'s fallback chain resolution rather than
+    re-deriving it, so contactability and the actual contact shown in the UI
+    can never disagree.
+    """
+    name = contact.get("name") or "the sponsor"
+    if contact.get("email"):
+        return OutlookComponent(
+            name="contactability", score=1.0, band="strong",
+            evidence=[f"Direct contact available with email ({name})."],
+        )
+    if contact.get("phone") or contact.get("contact_source") == "site_contact":
+        label = f"at {contact.get('facility')}" if contact.get("contact_source") == "site_contact" and contact.get("facility") else f"({name})"
+        return OutlookComponent(
+            name="contactability", score=0.6, band="fair",
+            evidence=[f"Contact available by phone only {label}."],
+        )
     return OutlookComponent(
         name="contactability", score=0.2, band="weak",
-        evidence=["No direct contact found — only sponsor information is available."],
+        evidence=[contact.get("guidance") or f"No direct phone/email contact found — only {name} is listed."],
     )
 
 
@@ -188,16 +188,21 @@ def compute_access_outlook(
     verdicts: list[CriterionVerdict],
     status_module: dict,
     locations: list[dict],
-    central_contacts: list[dict],
+    contact: dict,
     patient_lat: float | None = None,
     patient_lon: float | None = None,
     radius_mi: float = 50.0,
 ) -> AccessOutlook:
-    """Typed entry point for direct Python callers (e.g. unit tests)."""
+    """Typed entry point for direct Python callers (e.g. unit tests).
+
+    `contact` is the dict returned by fetch_trial.get_contact() — computed
+    once by the caller and passed in here so contactability and the contact
+    actually shown in the UI are guaranteed consistent.
+    """
     eligibility_component, blocking_rule_id, open_questions = _eligibility_fit(verdicts)
     momentum_component = _recruitment_momentum(status_module)
     geo_component = _geographic_access(locations, patient_lat, patient_lon, radius_mi)
-    contact_component = _contactability(central_contacts, locations)
+    contact_component = _contactability(contact)
     components = [eligibility_component, momentum_component, geo_component, contact_component]
 
     if blocking_rule_id:
@@ -252,7 +257,7 @@ def access_outlook(
             verdicts=verdict_objs,
             status_module=status_module,
             locations=contacts_locations.get("locations", []),
-            central_contacts=contacts_locations.get("centralContacts", []),
+            contact=get_contact(study, patient_lat, patient_lon),
             patient_lat=patient_lat,
             patient_lon=patient_lon,
             radius_mi=radius_mi,

@@ -196,6 +196,10 @@ class PriorTreatment(BaseModel):
 
 class PatientProfile(BaseModel):
     subject: str                # "self" | "relative" (affects compose voice)
+    relation: str | None         # added Phase 4 — "mother"/"father"/etc, only set
+                                 # when subject=="relative"; compose.py's "on behalf
+                                 # of my mother" voice needs the specific relation,
+                                 # not just the self/relative binary
     age: int | None
     sex: str | None
     condition: str | None       # normalized, e.g. "non-small cell lung cancer"
