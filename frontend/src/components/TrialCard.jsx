@@ -58,7 +58,10 @@ export default function TrialCard({ trial, onAnswerThis, onOpenCompose }) {
         <span>{summary.nct_id}</span>
         {nearest && (
           <span>
-            {nearest.facility} · {nearest.distance_mi} mi
+            {nearest.facility}
+            {[nearest.city, nearest.country].filter(Boolean).length > 0 &&
+              ` (${[nearest.city, nearest.country].filter(Boolean).join(', ')})`}
+            {nearest.distance_mi != null ? ` · ${nearest.distance_mi} mi` : ' · add ZIP for distance'}
           </span>
         )}
       </div>

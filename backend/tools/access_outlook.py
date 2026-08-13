@@ -116,10 +116,22 @@ def _geographic_access(
     locations: list[dict], patient_lat: float | None, patient_lon: float | None, radius_mi: float
 ) -> OutlookComponent:
     if patient_lat is None or patient_lon is None:
-        return OutlookComponent(
-            name="geographic_access", score=0.6, band="fair",
-            evidence=["Location not provided — distance to sites is unknown."],
-        )
+        # The TRIAL's site locations are known (that data came straight from the
+        # registry) — it's the PATIENT's location we don't have, so distance can't
+        # be computed. Say that unambiguously and still name a real site, rather
+        # than a generic line that reads as "this trial has no location."
+        evidence = ["Add your ZIP code to see distance to this trial's site(s) — not the trial's fault, we just don't know where you are yet."]
+        if locations:
+            site = locations[0]
+            facility = site.get("facility")
+            place = ", ".join(p for p in [site.get("city"), site.get("country")] if p)
+            count_desc = f"{len(locations)} site{'s' if len(locations) != 1 else ''}"
+            if facility:
+                site_desc = f"{facility}{f' ({place})' if place else ''}"
+                evidence.append(f"This trial lists {count_desc}, e.g. {site_desc}.")
+            else:
+                evidence.append(f"This trial lists {count_desc}.")
+        return OutlookComponent(name="geographic_access", score=0.6, band="fair", evidence=evidence)
 
     recruiting_dists = []
     for loc in locations:

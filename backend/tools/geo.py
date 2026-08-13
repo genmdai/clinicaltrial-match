@@ -53,11 +53,17 @@ def zip_to_latlon(zip_code: str) -> dict | None:
     return index.get(zip_code.strip().zfill(5))
 
 
-def nearest_sites(locations: list[dict], lat: float, lon: float, n: int = 3) -> list[dict]:
+def nearest_sites(locations: list[dict], lat: float | None, lon: float | None, n: int = 3) -> list[dict]:
     """Sort trial locations by distance from (lat, lon); attach distance_mi.
 
-    Locations without a geoPoint are skipped (can't be distance-sorted).
+    Locations without a geoPoint are skipped when a patient location is given
+    (can't be distance-sorted). Without a patient location, the trial's own
+    sites are still returned — just unsorted and without a distance_mi — so
+    the UI can show real site data instead of nothing.
     """
+    if lat is None or lon is None:
+        return [{**loc, "distance_mi": None} for loc in locations[:n]]
+
     with_distance = []
     for loc in locations:
         geo_point = loc.get("geoPoint")

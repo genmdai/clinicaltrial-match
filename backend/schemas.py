@@ -37,7 +37,9 @@ class NearestSite(BaseModel):
     facility: str | None = None
     city: str | None = None
     state: str | None = None
-    distance_mi: float
+    country: str | None = None
+    distance_mi: float | None = None  # None when the patient's own location isn't
+    # known yet — the trial's site is still shown, just without a computed distance
 
 
 class TrialSummary(BaseModel):

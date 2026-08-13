@@ -24,3 +24,6 @@ fixtures/cache/*
 .DS_Store
 .vscode/
 .idea/
+
+# Sandbox-only TLS fix (machine-local root cert bundle for live CT.gov calls)
+.sandbox-certs/

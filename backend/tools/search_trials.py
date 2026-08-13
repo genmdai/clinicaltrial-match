@@ -9,25 +9,44 @@ from .geo import haversine_miles
 MAX_CANDIDATES = 5
 
 
-def _nearest_site(locations: list[dict], lat: float, lon: float) -> NearestSite | None:
-    best = None
-    best_dist = None
-    for loc in locations:
-        geo_point = loc.get("geoPoint")
-        if not geo_point:
-            continue
-        dist = haversine_miles(lat, lon, geo_point["lat"], geo_point["lon"])
-        if best_dist is None or dist < best_dist:
-            best_dist = dist
-            best = loc
-    if best is None:
-        return None
+def _site_summary(loc: dict, distance_mi: float | None) -> NearestSite:
     return NearestSite(
-        facility=best.get("facility"),
-        city=best.get("city"),
-        state=best.get("state"),
-        distance_mi=round(best_dist, 1),
+        facility=loc.get("facility"),
+        city=loc.get("city"),
+        state=loc.get("state"),
+        country=loc.get("country"),
+        distance_mi=distance_mi,
     )
+
+
+def _nearest_site(locations: list[dict], lat: float | None, lon: float | None) -> NearestSite | None:
+    """Picks a representative site to show on the trial's summary card.
+
+    With a patient location, this is the actual nearest site (by haversine
+    distance). Without one, we still surface a real site from the trial's own
+    data — preferring one that's individually RECRUITING — with distance_mi
+    left null, rather than showing nothing at all. The trial's location is
+    always known here; only the patient's location might not be.
+    """
+    if not locations:
+        return None
+
+    if lat is not None and lon is not None:
+        best, best_dist = None, None
+        for loc in locations:
+            geo_point = loc.get("geoPoint")
+            if not geo_point:
+                continue
+            dist = haversine_miles(lat, lon, geo_point["lat"], geo_point["lon"])
+            if best_dist is None or dist < best_dist:
+                best_dist, best = dist, loc
+        if best is not None:
+            return _site_summary(best, round(best_dist, 1))
+        # Locations exist but none have a geoPoint to measure from — still show one.
+        return _site_summary(locations[0], None)
+
+    recruiting = next((loc for loc in locations if loc.get("status") == "RECRUITING"), None)
+    return _site_summary(recruiting or locations[0], None)
 
 
 def _normalize(study: dict, lat: float | None, lon: float | None) -> TrialSummary:
@@ -46,7 +65,7 @@ def _normalize(study: dict, lat: float | None, lon: float | None) -> TrialSummar
         status=status.get("overallStatus", ""),
         interventions=[i["name"] for i in arms.get("interventions", [])],
         site_count=len(locations),
-        nearest_site=_nearest_site(locations, lat, lon) if lat is not None and lon is not None else None,
+        nearest_site=_nearest_site(locations, lat, lon),
         has_central_contact=bool(contacts_locations.get("centralContacts")),
     )
 

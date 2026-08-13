@@ -112,6 +112,15 @@ def test_geo_fair_when_no_location_provided():
     assert component.band == "fair"
 
 
+def test_geo_evidence_blames_missing_patient_location_not_the_trial():
+    # Real bug: this must never read as "the trial has no location" — the
+    # trial's site IS known; only the patient's location is missing.
+    component = _geographic_access([NEARBY_SITE], None, None, radius_mi=50.0)
+    full_text = " ".join(component.evidence).lower()
+    assert "add your zip" in full_text or "we just don't know where you are" in full_text
+    assert "site a" in full_text  # the real site name still appears
+
+
 def test_geo_weak_when_no_recruiting_site_nearby():
     far_site = {"facility": "Site B", "status": "RECRUITING", "geoPoint": {"lat": 5.0, "lon": 5.0}}
     component = _geographic_access([far_site], *COLUMBUS, radius_mi=50.0)

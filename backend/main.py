@@ -141,10 +141,7 @@ async def match(payload: MatchRequest):
             if "error" in outlook_result:
                 continue
             locations = protocol.get("contactsLocationsModule", {}).get("locations", [])
-            sites = (
-                nearest_sites(locations, patient_lat, patient_lon, n=3)
-                if patient_lat is not None and patient_lon is not None else []
-            )
+            sites = nearest_sites(locations, patient_lat, patient_lon, n=3)
 
             results.append({
                 "summary": t,
