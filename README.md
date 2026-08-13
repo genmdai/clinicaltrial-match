@@ -4,11 +4,29 @@
 
 Pathway helps patients, caregivers, and clinicians move from **“What treatment options are left?”** to **“These trials may be relevant, here is why, and here is how to pursue them.”**
 
-Built with **AWS Strands Agents SDK**, **Claude on Amazon Bedrock**, **ClinicalTrials.gov API v2**, and deterministic Python eligibility logic.
+Built with **AWS Strands Agents SDK**, **Claude on Amazon Bedrock**, **ClinicalTrials.gov API v2** and **BrightData**
 
-> **Informational only — not medical advice.** Pathway supports pre-screening and navigation. Final eligibility is determined by the clinical-trial team.
 
-## The problem
+## Table of Contents
+1. [Collaborators](#collaborators)
+2. [The Problem](#the-problem)
+3. [Key Features](#key-features)
+4. [Differentiation](#differentiation)
+5. [System Architecture](#system-architecture)
+6. [Technology Stack](#technology-stack)
+7. [Getting Started](#getting-started)
+8. [Future Developments](#future-developments)
+
+## Collaborators
+
+Built for NTU's CAmpcOde Hackathon 2025 - Code with AI, The SUPERCELLS project is made possible by the contributions of the following individuals:
+
+| Name | GitHub | LinkedIn |
+|------|--------|----------|
+| Nicole Ang | [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nicoleang18) | [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/nicoleang18/) |
+| Teow Choon Ray | [![GitHub](https://img.shields.io/badge/github-%23121011.svg?style=for-the-badge&logo=github&logoColor=white)](https://github.com/TeowChoonRay) | [![LinkedIn](https://img.shields.io/badge/linkedin-%230077B5.svg?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/choonray/) |
+
+## The Problem
 
 ### Treatment options exist. Patients often cannot see, understand, or act on them.
 
@@ -27,7 +45,7 @@ A trial can be scientifically relevant and still be practically inaccessible.
 
 **Pathway turns clinical-trial discovery into a guided path toward access.**
 
-## What Pathway does
+## Key Features
 
 1. **Understand the patient** — converts a free-text narrative into a structured clinical profile and exposes assumptions for review.
 2. **Find relevant trials** — searches live recruiting studies through ClinicalTrials.gov.
@@ -39,7 +57,7 @@ A trial can be scientifically relevant and still be practically inaccessible.
 8. **Help the patient act** — surfaces recruiting sites, contacts, needed documents, next steps, and draft outreach material.
 9. **Enrich site access** — Bright Data looks up public links, such as a site's trials page or a sponsor's contact page, for a selected trial.
 
-## Why it is different
+## Differentiation
 
 ### Evidence-first eligibility
 
@@ -59,7 +77,7 @@ Pathway does not stop at *“here are some trials.”* It asks:
 
 > **What stands between this patient and actually reaching screening?**
 
-## Architecture
+## System Architecture
 
 ```text
                   Patient / Caregiver / Clinician
@@ -102,7 +120,7 @@ Pathway does not stop at *“here are some trials.”* It asks:
                  outreach / site screening
 ```
 
-## Data and integrations
+## Technology Stack
 
 | Source / tool                 | Role                                                                         |
 | ----------------------------- | ---------------------------------------------------------------------------- |
@@ -112,14 +130,7 @@ Pathway does not stop at *“here are some trials.”* It asks:
 | **Bright Data**               | Public link lookup (site's trials page, sponsor's contact page) for a selected trial |
 | **React + FastAPI**           | Patient-facing experience and backend orchestration                          |
 
-### Source-of-truth rule
-
-ClinicalTrials.gov remains authoritative for official eligibility, recruiting status, study locations, and study contacts. Bright Data only enriches the **access layer** and should never override registry data. Patient PHI should not be sent to Bright Data.
-
-## Access Outlook
-
 Pathway avoids fake probability scores. Each study receives a transparent **High / Moderate / Low / Blocked / Unclear** outlook based on:
-
 * **Eligibility fit**
 * **Recruitment momentum**
 * **Geographic access**
@@ -127,7 +138,7 @@ Pathway avoids fake probability scores. Each study receives a transparent **High
 
 A confirmed hard eligibility failure forces **Blocked**. Missing information stays visible as **UNKNOWN**.
 
-## Running locally
+## Getting Started
 
 ### Backend
 
@@ -146,7 +157,7 @@ npm install
 npm run dev
 ```
 
-## Roadmap
+## Future Developments
 
 **Patient access**
 
