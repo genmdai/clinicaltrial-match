@@ -235,6 +235,56 @@ def test_not_had_unknown_when_history_unrecorded():
     assert verdicts[0].verdict == "UNKNOWN"
 
 
+# --- other + topic: dynamically extracted facts (no hardcoded field per pattern) ---
+
+def test_other_topic_exclusion_fails_when_fact_present():
+    verdicts, _ = evaluate(
+        [_rule(field="other", operator="not_had", value="brain metastases", kind="exclusion",
+               topic="brain_metastases", topic_question="Does the patient have brain metastases?")],
+        _profile(other_facts={"brain_metastases": "yes"}),
+    )
+    assert verdicts[0].verdict == "FAIL"
+
+
+def test_other_topic_exclusion_passes_when_fact_absent():
+    verdicts, _ = evaluate(
+        [_rule(field="other", operator="not_had", value="brain metastases", kind="exclusion",
+               topic="brain_metastases", topic_question="Does the patient have brain metastases?")],
+        _profile(other_facts={"brain_metastases": "no"}),
+    )
+    assert verdicts[0].verdict == "PASS"
+
+
+def test_other_topic_inclusion_uses_opposite_direction():
+    verdicts, _ = evaluate(
+        [_rule(field="other", operator="must_have", value="measurable disease", kind="inclusion",
+               topic="measurable_disease", topic_question="Does the patient have measurable disease?")],
+        _profile(other_facts={"measurable_disease": "yes"}),
+    )
+    assert verdicts[0].verdict == "PASS"
+
+
+def test_other_topic_unknown_when_unanswered():
+    verdicts, _ = evaluate(
+        [_rule(field="other", operator="not_had", value="brain metastases", kind="exclusion",
+               topic="brain_metastases", topic_question="Does the patient have brain metastases?")],
+        _profile(),
+    )
+    assert verdicts[0].verdict == "UNKNOWN"
+    assert verdicts[0].follow_up_question == "Does the patient have brain metastases?"
+
+
+def test_other_without_topic_still_falls_back_to_unmapped_behavior():
+    # No topic extracted (e.g. purely administrative criterion) — must behave
+    # exactly like before topic/topic_question existed.
+    verdicts, _ = evaluate(
+        [_rule(field="other", operator="contains", value="informed consent")],
+        _profile(),
+    )
+    assert verdicts[0].verdict == "UNKNOWN"
+    assert verdicts[0].follow_up_question == "Can you confirm this criterion with the trial team?"
+
+
 # --- P2/P3: low confidence and unmapped fields never produce a guessed FAIL/PASS ---
 
 def test_low_parse_confidence_caps_to_unknown_even_if_evaluable():

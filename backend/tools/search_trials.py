@@ -4,9 +4,9 @@ from strands import tool
 
 from ..schemas import NearestSite, TrialSummary
 from . import _ctgov_client
-from .geo import haversine_miles
+from .geo import haversine_miles, nearest_recruiting_distance_mi
 
-MAX_CANDIDATES = 5
+MAX_CANDIDATES = 50
 
 
 def _site_summary(loc: dict, distance_mi: float | None) -> NearestSite:
@@ -67,6 +67,7 @@ def _normalize(study: dict, lat: float | None, lon: float | None) -> TrialSummar
         site_count=len(locations),
         nearest_site=_nearest_site(locations, lat, lon),
         has_central_contact=bool(contacts_locations.get("centralContacts")),
+        nearest_recruiting_distance_mi=nearest_recruiting_distance_mi(locations, lat, lon),
     )
 
 
@@ -94,9 +95,12 @@ def search_trials(
             live API. Also forced on by the OFFLINE=1 environment variable.
 
     Returns:
-        {"trials": [TrialSummary, ...]} (capped at 5, latency budget for
-        downstream criteria parsing) on success, or {"error": "<message>"} on
-        failure — never raises into the agent loop.
+        {"trials": [TrialSummary, ...], "total_count": int} on success — trials
+        capped at MAX_CANDIDATES (latency budget for downstream criteria
+        parsing), total_count is the true registry-wide match count from
+        ClinicalTrials.gov (via countTotal=true) so the UI can show an honest
+        "screening N of M" figure instead of implying M were all scored — or
+        {"error": "<message>"} on failure — never raises into the agent loop.
     """
     try:
         statuses = "RECRUITING|NOT_YET_RECRUITING" if include_not_yet_recruiting else "RECRUITING"
@@ -104,6 +108,7 @@ def search_trials(
             "query.cond": condition,
             "filter.overallStatus": statuses,
             "pageSize": MAX_CANDIDATES,
+            "countTotal": "true",
             "format": "json",
         }
         if intervention:
@@ -114,6 +119,7 @@ def search_trials(
         data = _ctgov_client.request_json("", params, offline=offline)
         studies = data.get("studies", [])[:MAX_CANDIDATES]
         trials = [_normalize(s, lat, lon) for s in studies]
-        return {"trials": [t.model_dump() for t in trials]}
+        total_count = data.get("totalCount", len(studies))
+        return {"trials": [t.model_dump() for t in trials], "total_count": total_count}
     except Exception as e:  # noqa: BLE001 — tool boundary: must never raise into the agent loop (CLAUDE.md §6)
         return {"error": str(e)}

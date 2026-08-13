@@ -2,7 +2,10 @@ import asyncio
 
 from backend.schemas import EligibilityRule
 from backend.tools.parse_criteria import (
+    _ParsedRuleLLM,
     _cache_path,
+    _normalize_topic,
+    _reconcile_rule,
     _write_cache,
     parse_criteria_stream,
     split_criteria,
@@ -45,6 +48,37 @@ def test_split_criteria_case_insensitive_headers():
     chunks = split_criteria(text)
     assert "Age >= 18" in chunks["inclusion"]
     assert "Prior chemo" in chunks["exclusion"]
+
+
+# --- topic normalization / reconciliation (dynamic "other" clustering) ---
+
+def test_normalize_topic_slugifies_and_dedupes_punctuation():
+    assert _normalize_topic("Brain Metastases") == "brain_metastases"
+    assert _normalize_topic("  CNS/Brain-Metastases! ") == "cns_brain_metastases"
+    assert _normalize_topic(None) is None
+    assert _normalize_topic("   ") is None
+
+
+def test_reconcile_rule_keeps_topic_and_high_confidence_when_extracted():
+    raw = _ParsedRuleLLM(
+        kind="exclusion", field="other", operator="not_had", value="brain metastases",
+        source_quote="No untreated brain metastases", topic="Brain Metastases",
+        topic_question="Does the patient have brain metastases?",
+    )
+    rule = _reconcile_rule(raw, "exclusion", "NCT001", 0, "No untreated brain metastases allowed")
+    assert rule.topic == "brain_metastases"
+    assert rule.topic_question == "Does the patient have brain metastases?"
+    assert rule.parse_confidence == "high"
+
+
+def test_reconcile_rule_other_without_topic_stays_low_confidence():
+    raw = _ParsedRuleLLM(
+        kind="inclusion", field="other", operator="contains", value="consent",
+        source_quote="Willing to provide informed consent",
+    )
+    rule = _reconcile_rule(raw, "inclusion", "NCT001", 0, "Willing to provide informed consent")
+    assert rule.topic is None
+    assert rule.parse_confidence == "low"
 
 
 def _fake_rule(rule_id: str) -> EligibilityRule:

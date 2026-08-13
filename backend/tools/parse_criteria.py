@@ -13,6 +13,7 @@ low-confidence rules at UNKNOWN per P2/P3, it doesn't need them discarded).
 
 import asyncio
 import json
+import os
 import re
 from pathlib import Path
 
@@ -30,6 +31,12 @@ _EXCLUSION_RE = re.compile(r"exclusion criteria:?", re.IGNORECASE)
 _VALID_FIELDS = {"age", "prior_therapy_class", "condition", "biomarker", "treatment_naive", "ecog", "other"}
 _VALID_OPERATORS = {"gte", "lte", "eq", "contains", "not_had", "must_have"}
 
+# Bounds concurrent Bedrock calls across a batch. At the old 5-candidate cap this
+# never mattered; at today's 50-candidate cap (each up to 2 sequential chunk calls),
+# firing all of them at once risks throttling with no backoff anywhere in this
+# module. Env-configurable so a demo can tune it without a code change.
+_PARSE_SEMAPHORE = asyncio.Semaphore(int(os.environ.get("PARSE_CRITERIA_CONCURRENCY", "6")))
+
 SYSTEM_PROMPT = """You extract structured eligibility rules from one section (either \
 INCLUSION or EXCLUSION, occasionally unlabeled) of a clinical trial's eligibility \
 criteria text.
@@ -43,6 +50,21 @@ genuinely unlabeled, use your best judgment.
 "treatment_naive", "ecog", "other". Use "other" for anything that doesn't fit \
 (brain metastases, organ function, informed consent, pregnancy, prior therapy line \
 counts, etc.) — do not force a bad fit.
+- topic / topic_question (ONLY when field="other"): if the criterion describes a \
+concrete, current fact about the patient's own health or history that the patient \
+could confirm with a single yes/no answer (e.g. brain/CNS metastases, pregnancy or \
+breastfeeding, HIV or Hepatitis B/C infection, measurable disease, autoimmune \
+disease, major surgery) — as opposed to administrative/procedural criteria with no \
+such fact (informed consent, willingness to comply, site logistics, contraception \
+commitments) — also set:
+  - topic: a short, normalized snake_case identifier for the underlying fact, the \
+SAME identifier every time this fact recurs even if a trial's wording differs (e.g. \
+always "brain_metastases", never "cns_involvement" one time and "brain_mets" the \
+next).
+  - topic_question: one natural yes/no question a patient could answer to resolve \
+it, e.g. "Does the patient currently have brain metastases?".
+  Leave both null when field != "other", or when no such reusable, \
+patient-answerable fact applies.
 - operator: exactly one of "gte", "lte", "eq", "contains", "not_had", "must_have".
   - age / ecog: "gte"/"lte"/"eq" with a numeric value.
   - condition: "contains", value = the key diagnosis phrase.
@@ -68,6 +90,8 @@ class _ParsedRuleLLM(BaseModel):
     operator: str
     value: str | int
     source_quote: str
+    topic: str | None = None
+    topic_question: str | None = None
 
 
 class _ParsedRules(BaseModel):
@@ -100,8 +124,9 @@ def split_criteria(text: str) -> dict[str, str]:
 
 
 async def _extract_chunk_async(chunk_text: str) -> list[_ParsedRuleLLM]:
-    agent = Agent(model=get_model(), system_prompt=SYSTEM_PROMPT)
-    result = await agent.invoke_async(chunk_text, structured_output_model=_ParsedRules)
+    async with _PARSE_SEMAPHORE:
+        agent = Agent(model=get_model(), system_prompt=SYSTEM_PROMPT)
+        result = await agent.invoke_async(chunk_text, structured_output_model=_ParsedRules)
     if result.structured_output is None:
         raise ValueError("model returned no structured output")
     return result.structured_output.rules
@@ -114,15 +139,31 @@ async def _extract_chunk_with_retry_async(chunk_text: str, full_text: str) -> li
     return rules
 
 
+def _normalize_topic(raw_topic: str | None) -> str | None:
+    """Defensive normalization of the LLM's free-text topic into a stable
+    clustering key — never trust model output verbatim as a dict/cluster key.
+    """
+    if not raw_topic:
+        return None
+    slug = re.sub(r"[^a-z0-9]+", "_", raw_topic.strip().lower()).strip("_")
+    return slug or None
+
+
 def _reconcile_rule(raw: _ParsedRuleLLM, known_kind: str | None, nct_id: str, index: int, full_text: str) -> EligibilityRule:
     kind = known_kind if known_kind in ("inclusion", "exclusion") else (
         raw.kind if raw.kind in ("inclusion", "exclusion") else "inclusion"
     )
     field = raw.field if raw.field in _VALID_FIELDS else "other"
     operator = raw.operator if raw.operator in _VALID_OPERATORS else "contains"
+    topic = _normalize_topic(raw.topic) if field == "other" else None
+    topic_question = raw.topic_question.strip() if (topic and raw.topic_question) else None
 
     confidence = "high"
-    if field == "other" or raw.field not in _VALID_FIELDS or raw.operator not in _VALID_OPERATORS:
+    if raw.field not in _VALID_FIELDS or raw.operator not in _VALID_OPERATORS:
+        confidence = "low"
+    elif field == "other" and topic is None:
+        # Free-text "other" with no extractable reusable fact — same "can't
+        # automatically judge this" bucket as before topic/topic_question existed.
         confidence = "low"
     if raw.source_quote not in full_text:
         confidence = "low"  # quote still didn't validate after the retry (P1)
@@ -135,6 +176,8 @@ def _reconcile_rule(raw: _ParsedRuleLLM, known_kind: str | None, nct_id: str, in
         value=raw.value,
         source_quote=raw.source_quote,
         parse_confidence=confidence,
+        topic=topic,
+        topic_question=topic_question,
     )
 
 
@@ -192,10 +235,12 @@ def parse_criteria(nct_id: str, criteria_text: str) -> dict:
 
 
 async def parse_criteria_batch(trials: list[dict]) -> dict[str, dict]:
-    """Parse up to 5 trials concurrently (latency budget, CLAUDE.md Phase 3).
+    """Parse a batch of trials concurrently — caller controls how many (the
+    per-chunk `_PARSE_SEMAPHORE` bounds actual simultaneous Bedrock calls
+    regardless of batch size, CLAUDE.md Phase 3/§6).
 
     Args:
-        trials: list of {"nct_id": str, "criteria_text": str}, capped at 5.
+        trials: list of {"nct_id": str, "criteria_text": str}.
 
     Returns:
         {nct_id: {"rules": [...]}} or {nct_id: {"error": "<message>"}} per trial.
@@ -212,7 +257,7 @@ async def parse_criteria_batch(trials: list[dict]) -> dict[str, dict]:
         except Exception as e:  # noqa: BLE001 — per-trial isolation: one bad trial must not sink the batch
             return nct_id, {"error": str(e)}
 
-    results = await asyncio.gather(*(_one(t) for t in trials[:5]))
+    results = await asyncio.gather(*(_one(t) for t in trials))
     return dict(results)
 
 
@@ -222,7 +267,8 @@ async def parse_criteria_stream(trials: list[dict]):
     for NCT0512… ✓") instead of waiting for the whole batch at once.
 
     Args:
-        trials: list of {"nct_id": str, "criteria_text": str}, capped at 5.
+        trials: list of {"nct_id": str, "criteria_text": str}. Caller controls
+            how many; `_PARSE_SEMAPHORE` bounds simultaneous Bedrock calls.
 
     Yields:
         (nct_id, {"rules": [...]}) or (nct_id, {"error": "<message>"}), in
@@ -240,5 +286,5 @@ async def parse_criteria_stream(trials: list[dict]):
         except Exception as e:  # noqa: BLE001 — per-trial isolation: one bad trial must not sink the stream
             return nct_id, {"error": str(e)}
 
-    for coro in asyncio.as_completed([_one(t) for t in trials[:5]]):
+    for coro in asyncio.as_completed([_one(t) for t in trials]):
         yield await coro

@@ -31,6 +31,9 @@ class PatientProfile(BaseModel):
     comorbidities: list[str] = []
     location_zip: str | None = None
     assumptions: list[str] = []
+    other_facts: dict[str, str] = {}  # topic slug -> "yes" | "no" | "unclear",
+    # e.g. {"brain_metastases": "no"} — patient-reported answers to dynamically
+    # extracted field="other" criteria (see EligibilityRule.topic)
 
 
 class NearestSite(BaseModel):
@@ -51,6 +54,9 @@ class TrialSummary(BaseModel):
     site_count: int = 0
     nearest_site: NearestSite | None = None
     has_central_contact: bool = False
+    nearest_recruiting_distance_mi: float | None = None  # None when patient location
+    # unknown, or no site is both geo-located and individually RECRUITING — drives
+    # the adaptive-screening travel-radius filter (next_question.py)
 
 
 class EligibilityRule(BaseModel):
@@ -62,6 +68,13 @@ class EligibilityRule(BaseModel):
     value: str | int
     source_quote: str
     parse_confidence: str  # "high" | "low"
+    topic: str | None = None  # only set when field=="other" AND the LLM found a
+    # concrete, reusable, patient-answerable fact (e.g. "brain_metastases") —
+    # normalized snake_case, shared across trials that phrase the same fact
+    # differently. None means this "other" rule stays free-text/per-trial-only.
+    topic_question: str | None = None  # a yes/no question for `topic`, set
+    # together with it — the follow-up shown to the patient instead of the
+    # generic "confirm with the trial team" catch-all.
 
 
 class CriterionVerdict(BaseModel):

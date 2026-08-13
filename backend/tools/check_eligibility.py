@@ -12,6 +12,13 @@ from strands import tool
 
 from ..schemas import CriterionVerdict, EligibilityRule, PatientProfile
 
+# Shared by every "can't automatically judge this" path below (low parse
+# confidence, unsupported operator, no evaluator for this field) — also used by
+# next_question.py to recognize verdicts that must never enter cross-trial
+# clustering (their follow_up_question carries no field-specific meaning to
+# cluster on).
+GENERIC_FOLLOWUP = "Can you confirm this criterion with the trial team?"
+
 
 def _normalize(s: str) -> str:
     return re.sub(r"[^a-z0-9]", "", s.lower())
@@ -52,7 +59,7 @@ def _evaluate_age(rule: EligibilityRule, profile: PatientProfile) -> CriterionVe
         return _unknown(rule, "Patient's age is not known.", "What is the patient's age?")
     ok = _compare(rule.operator, profile.age, int(rule.value))
     if ok is None:
-        return _unknown(rule, f"Unsupported age operator {rule.operator!r}.", "Can you confirm this criterion with the trial team?")
+        return _unknown(rule, f"Unsupported age operator {rule.operator!r}.", GENERIC_FOLLOWUP)
     return _verdict(rule, ok, f"Patient age {profile.age} {'meets' if ok else 'does not meet'} the requirement ({rule.operator} {rule.value}).")
 
 
@@ -61,7 +68,7 @@ def _evaluate_ecog(rule: EligibilityRule, profile: PatientProfile) -> CriterionV
         return _unknown(rule, "Patient's ECOG performance status is not known.", "What is the patient's ECOG performance status?")
     ok = _compare(rule.operator, profile.ecog, int(rule.value))
     if ok is None:
-        return _unknown(rule, f"Unsupported ecog operator {rule.operator!r}.", "Can you confirm this criterion with the trial team?")
+        return _unknown(rule, f"Unsupported ecog operator {rule.operator!r}.", GENERIC_FOLLOWUP)
     return _verdict(rule, ok, f"Patient ECOG {profile.ecog} {'meets' if ok else 'does not meet'} the requirement ({rule.operator} {rule.value}).")
 
 
@@ -174,6 +181,25 @@ def _evaluate_not_had_class(rule: EligibilityRule, profile: PatientProfile) -> C
     return _unknown(rule, "Prior treatment history is not known.", "Has the patient received any prior systemic therapy, and if so which drugs or drug classes?")
 
 
+def _evaluate_other_topic(rule: EligibilityRule, profile: PatientProfile) -> CriterionVerdict:
+    """Generalizes the treatment_naive/prior_therapy_class not_had pattern to
+    ANY dynamically extracted "other" fact (rule.topic), so newly-recurring
+    criterion types (brain metastases, pregnancy, HIV/Hepatitis, ...) become
+    evaluable/clusterable without a hardcoded field per pattern (parse_criteria.py
+    extracts topic + topic_question; this just looks it up and applies kind's
+    direction — exclusion criteria require the fact's ABSENCE, inclusion its
+    PRESENCE).
+    """
+    label = rule.topic.replace("_", " ")
+    question = rule.topic_question or GENERIC_FOLLOWUP
+    status = profile.other_facts.get(rule.topic)
+    if not status or status == "unclear":
+        return _unknown(rule, f"Whether the patient has {label} is not known.", question)
+    has_fact = status == "yes"
+    ok = (not has_fact) if rule.kind == "exclusion" else has_fact
+    return _verdict(rule, ok, f"Patient's recorded status for {label} ({status}) {'meets' if ok else 'does not meet'} the requirement.")
+
+
 _EVALUATORS = {
     ("age", "gte"): _evaluate_age,
     ("age", "lte"): _evaluate_age,
@@ -204,12 +230,19 @@ def evaluate(rules: list[EligibilityRule], profile: PatientProfile) -> tuple[lis
     """Typed entry point for direct Python callers (e.g. unit tests)."""
     verdicts = []
     for rule in rules:
+        if rule.field == "other" and rule.topic and rule.parse_confidence != "low":
+            # Dispatched by field+topic, not the (field, operator) table below —
+            # operator on a dynamically-extracted "other" rule is unreliable, but
+            # rule.kind (assigned deterministically by parse_criteria.py's chunk
+            # split, not the LLM) always tells us the required direction.
+            verdicts.append(_evaluate_other_topic(rule, profile))
+            continue
         if rule.parse_confidence == "low":
-            verdicts.append(_unknown(rule, "This criterion's wording was ambiguous to parse confidently.", "Can you confirm this criterion with the trial team?"))
+            verdicts.append(_unknown(rule, "This criterion's wording was ambiguous to parse confidently.", GENERIC_FOLLOWUP))
             continue
         evaluator = _EVALUATORS.get((rule.field, rule.operator))
         if evaluator is None:
-            verdicts.append(_unknown(rule, "This criterion type isn't automatically checkable yet.", "Can you confirm this criterion with the trial team?"))
+            verdicts.append(_unknown(rule, "This criterion type isn't automatically checkable yet.", GENERIC_FOLLOWUP))
             continue
         verdicts.append(evaluator(rule, profile))
     return verdicts, _rollup(verdicts)
