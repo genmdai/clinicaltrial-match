@@ -10,7 +10,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
+from backend.tools.check_eligibility import check_eligibility
 from backend.tools.extract_profile import extract_profile
+from backend.tools.parse_criteria import parse_criteria
 
 CASES_PATH = Path(__file__).parent / "cases.json"
 
@@ -83,6 +85,57 @@ def check_extraction_case(profile: dict, expect: dict) -> list[str]:
     return failures
 
 
+def check_verdicts_case(verdicts: list[dict], rollup: str, expect: dict) -> list[str]:
+    failures = []
+
+    if "rollup_prefix" in expect and not rollup.startswith(expect["rollup_prefix"]):
+        failures.append(f"rollup={rollup!r}, expected prefix {expect['rollup_prefix']!r}")
+    if "rollup_prefix_any" in expect and not any(rollup.startswith(p) for p in expect["rollup_prefix_any"]):
+        failures.append(f"rollup={rollup!r}, expected one of prefixes {expect['rollup_prefix_any']!r}")
+    if expect.get("no_fail") and any(v["verdict"] == "FAIL" for v in verdicts):
+        fails = [v for v in verdicts if v["verdict"] == "FAIL"]
+        failures.append(f"expected no FAIL verdicts, got: {fails}")
+    if "fail_reason_contains" in expect:
+        needle = expect["fail_reason_contains"]
+        if not any(v["verdict"] == "FAIL" and _icontains(v["reason"], needle) for v in verdicts):
+            failures.append(f"no FAIL verdict has reason containing {needle!r}")
+    if "fail_quote_contains" in expect:
+        needle = expect["fail_quote_contains"]
+        if not any(v["verdict"] == "FAIL" and _icontains(v["source_quote"], needle) for v in verdicts):
+            failures.append(f"no FAIL verdict has source_quote containing {needle!r}")
+
+    return failures
+
+
+def run_verdicts_stage(cases: list[dict]) -> tuple[int, int]:
+    passed = 0
+    for case in cases:
+        profile_result = extract_profile(case["narrative"])
+        if "error" in profile_result:
+            print(f"FAIL #{case['id']}: extraction errored: {profile_result['error']}")
+            continue
+
+        rules_result = parse_criteria(case["trial_nct_id"], case["criteria_text"])
+        if "error" in rules_result:
+            print(f"FAIL #{case['id']}: parse_criteria errored: {rules_result['error']}")
+            continue
+
+        check_result = check_eligibility(rules_result["rules"], profile_result["profile"])
+        if "error" in check_result:
+            print(f"FAIL #{case['id']}: check_eligibility errored: {check_result['error']}")
+            continue
+
+        failures = check_verdicts_case(check_result["verdicts"], check_result["rollup"], case["expect"])
+        if failures:
+            print(f"FAIL #{case['id']}: {case['trial_nct_id']} — rollup={check_result['rollup']!r}")
+            for f in failures:
+                print(f"       - {f}")
+        else:
+            print(f"PASS #{case['id']}: {case['trial_nct_id']} — rollup={check_result['rollup']!r}")
+            passed += 1
+    return passed, len(cases)
+
+
 def run_extraction_stage(cases: list[dict]) -> tuple[int, int]:
     passed = 0
     for case in cases:
@@ -103,7 +156,7 @@ def run_extraction_stage(cases: list[dict]) -> tuple[int, int]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("--stage", choices=["extraction"], default=None)
+    parser.add_argument("--stage", choices=["extraction", "verdicts"], default=None)
     args = parser.parse_args()
 
     cases = json.loads(CASES_PATH.read_text())
@@ -116,6 +169,8 @@ def main() -> None:
         stage_cases = [c for c in cases if c["stage"] == stage]
         if stage == "extraction":
             passed, total = run_extraction_stage(stage_cases)
+        elif stage == "verdicts":
+            passed, total = run_verdicts_stage(stage_cases)
         else:
             print(f"no runner for stage {stage!r} yet")
             continue

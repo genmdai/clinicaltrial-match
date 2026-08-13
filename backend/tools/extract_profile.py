@@ -10,14 +10,13 @@ judges" split used for eligibility rules (CLAUDE.md §4), applied to drug facts.
 
 import difflib
 import json
-import os
 import re
 from pathlib import Path
 
 from strands import Agent, tool
-from strands.models import BedrockModel
 
 from ..schemas import PatientProfile, PriorTreatment
+from ._llm import get_model
 
 _ONTOLOGY_PATH = Path(__file__).resolve().parents[1] / "data" / "drug_ontology.json"
 _ONTOLOGY = json.loads(_ONTOLOGY_PATH.read_text())
@@ -176,21 +175,8 @@ def _reconcile(profile: PatientProfile, narrative: str) -> PatientProfile:
     })
 
 
-_model: BedrockModel | None = None
-
-
-def _get_model() -> BedrockModel:
-    global _model
-    if _model is None:
-        _model = BedrockModel(
-            region_name=os.environ["BEDROCK_REGION"],
-            model_id=os.environ["BEDROCK_MODEL_ID"],
-        )
-    return _model
-
-
 def _run_extraction(narrative: str) -> PatientProfile:
-    agent = Agent(model=_get_model(), system_prompt=SYSTEM_PROMPT)
+    agent = Agent(model=get_model(), system_prompt=SYSTEM_PROMPT)
     result = agent(narrative, structured_output_model=PatientProfile)
     if result.structured_output is None:
         raise ValueError("model returned no structured output")

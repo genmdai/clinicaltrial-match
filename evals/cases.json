@@ -116,5 +116,28 @@
       "ecog": 1,
       "sex_prefix": "f"
     }
+  },
+  {
+    "id": 11,
+    "stage": "verdicts",
+    "narrative": "my mom has advanced non-small cell lung cancer, she's been on Keytruda for a year and it stopped working, she's 68",
+    "trial_nct_id": "FIXTURE-NAIVE-REQUIRED",
+    "criteria_text": "Inclusion Criteria:\n\n* Histologically confirmed non-small cell lung cancer\n* No prior systemic therapy for advanced or metastatic disease\n* Age 18 years or older\n\nExclusion Criteria:\n\n* Prior treatment with any anti-PD-1 or anti-PD-L1 agent",
+    "expect": {
+      "rollup_prefix": "Likely not eligible",
+      "fail_reason_contains": "prior systemic treatment",
+      "fail_quote_contains": "No prior systemic therapy"
+    }
+  },
+  {
+    "id": 12,
+    "stage": "verdicts",
+    "narrative": "my mom has advanced non-small cell lung cancer, she's been on Keytruda for a year and it stopped working, she's 68",
+    "trial_nct_id": "FIXTURE-IO-ALLOWED",
+    "criteria_text": "Inclusion Criteria:\n\n* Histologically confirmed non-small cell lung cancer\n* Age 18 years or older\n* Known EGFR mutation status\n\nExclusion Criteria:\n\n* Active untreated brain metastases\n* More than 3 prior lines of systemic therapy",
+    "expect": {
+      "no_fail": true,
+      "rollup_prefix_any": ["Possibly eligible", "Looks eligible"]
+    }
   }
 ]
