@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+pydantic
+boto3
+strands-agents
+strands-agents-tools
+pytest
+ruff
