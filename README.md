@@ -2,10 +2,13 @@
 
 **AI-powered treatment observability and clinical-trial access for patients with serious or rare conditions.**
 
+<p align="center">
+  <img src="pathway.png" alt="Pathway">
+</p>
+
 Pathway helps patients, caregivers, and clinicians move from **“What treatment options are left?”** to **“These trials may be relevant, here is why, and here is how to pursue them.”**
 
 Built with **AWS Strands Agents SDK**, **Claude on Amazon Bedrock**, **ClinicalTrials.gov API v2** and **BrightData**
-
 
 ## Table of Contents
 1. [Collaborators](#collaborators)
