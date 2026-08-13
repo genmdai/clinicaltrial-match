@@ -85,3 +85,56 @@ class AccessOutlook(BaseModel):
         "Heuristic estimate from registry signals — not a probability. "
         "Final say is the trial team's."
     )
+
+
+# --- Bright Data enrichment (trial/site identity only — never PatientProfile
+# or any other patient data crosses this boundary) ---
+
+
+class TrialEnrichmentInput(BaseModel):
+    nct_id: str
+    title: str
+    sponsor: str | None = None
+
+
+class SiteEnrichmentInput(BaseModel):
+    facility: str
+    city: str | None = None
+    state: str | None = None
+    hospital_domain: str | None = None
+
+
+class HospitalTrialPage(BaseModel):
+    url: str | None = None
+    title: str | None = None
+
+
+class TrialOfficeContact(BaseModel):
+    name: str | None = None
+    phone: str | None = None
+    email: str | None = None
+    contact_form: str | None = None
+
+
+class ReferralInfo(BaseModel):
+    instructions: str | None = None
+    physician_referral_required: bool | None = None
+    url: str | None = None
+
+
+class EnrichmentSource(BaseModel):
+    url: str
+    title: str | None = None
+    domain_type: str  # "hospital" | "sponsor" | "other"
+
+
+class TrialAccessEnrichment(BaseModel):
+    trial_id: str
+    site: str | None = None
+    hospital_trial_page: HospitalTrialPage = HospitalTrialPage()
+    trial_office: TrialOfficeContact = TrialOfficeContact()
+    referral: ReferralInfo = ReferralInfo()
+    documents_mentioned: list[str] = []
+    sponsor_study_page: str | None = None
+    patient_resources: list[str] = []
+    sources: list[EnrichmentSource] = []

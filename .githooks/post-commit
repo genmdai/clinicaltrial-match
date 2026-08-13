@@ -1,0 +1,10 @@
+#!/bin/sh
+
+# Auto-push the current branch after each successful commit.
+branch="$(git symbolic-ref --quiet --short HEAD 2>/dev/null)" || exit 0
+
+if git rev-parse --abbrev-ref --symbolic-full-name '@{u}' >/dev/null 2>&1; then
+  git push
+else
+  git push -u origin "$branch"
+fi

@@ -1,0 +1,208 @@
+/* TrialPath page layer — sits on top of the Broadsheet design system tokens. */
+
+:root {
+  --font-heading: 'Montserrat', system-ui, sans-serif;
+  --font-heading-weight: 700;
+  --font-body: 'Open Sans', system-ui, sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+  background: var(--color-bg);
+}
+
+#root {
+  width: auto;
+  max-width: none;
+  border-inline: 0;
+  min-height: 100svh;
+  display: block;
+  text-align: left;
+}
+
+#tp-chat {
+  min-height: 200px;
+}
+
+.tp-app a {
+  color: var(--color-accent-700);
+  text-decoration: none;
+}
+.tp-app a:hover {
+  color: var(--color-accent-600);
+  text-decoration: underline;
+}
+.tp-app button {
+  font-family: var(--font-body);
+}
+
+.tp-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-divider);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--color-text);
+}
+.tp-chip:hover {
+  background: var(--color-accent-100);
+  border-color: var(--color-accent-400);
+}
+
+.tp-filter {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 9px;
+  padding: 5px 11px;
+  font-size: 13px;
+  white-space: nowrap;
+  background: var(--color-accent-100);
+  border: 1px solid var(--color-accent-300);
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--color-accent-900);
+}
+.tp-filter:hover {
+  background: var(--color-accent-200);
+}
+
+.tp-app {
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  color: var(--color-text);
+}
+.tp-app h1,
+.tp-app h2,
+.tp-app h3,
+.tp-app h4 {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin: 0;
+}
+.tp-app .btn,
+.tp-app .card-title,
+.tp-app .card-kicker,
+.tp-app .tag,
+.tp-app .nav-brand {
+  font-family: var(--font-heading);
+}
+.tp-label {
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+.tp-app .input,
+.tp-app input,
+.tp-app textarea {
+  font-family: var(--font-body);
+  font-size: 15px;
+}
+
+.tp-app .btn {
+  font-size: 13px;
+}
+.tp-app .tag {
+  font-size: 13px;
+}
+.tp-app .card-kicker {
+  font-size: 11px;
+}
+.tp-app .card-title {
+  font-size: 21px;
+}
+
+.tp-count {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: color 0.2s ease;
+}
+
+.tp-rail {
+  display: grid;
+  grid-template-columns: 136px minmax(0, 1fr);
+  gap: 18px;
+  align-items: baseline;
+}
+
+.tp-fade {
+  animation: tpFade 0.32s ease both;
+}
+@keyframes tpFade {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes tpPulse {
+  0%,
+  100% {
+    opacity: 0.35;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.tp-pulse {
+  animation: tpPulse 1.1s ease-in-out infinite;
+}
+
+.tp-scroll {
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.tp-cover {
+  background:
+    radial-gradient(circle at 1px 1px, rgba(32, 30, 29, 0.055) 1px, transparent 1px) 0 0 / 22px 22px,
+    linear-gradient(180deg, #ffffff 0%, #ffffff 38%, #eef2fb 78%, #e3ebfa 100%);
+}
+
+.tp-profile {
+  position: relative;
+  -webkit-mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 22px), transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 0, #000 calc(100% - 22px), transparent 100%);
+}
+
+.tp-uppercase-label {
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+  font-family: var(--font-heading);
+  font-weight: 700;
+}
+
+.tp-btn-reset {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.tp-offline-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--color-accent-2-700);
+  background: var(--color-accent-2-100);
+  border: 1px solid var(--color-accent-2-300);
+  border-radius: 999px;
+  padding: 4px 10px;
+}
