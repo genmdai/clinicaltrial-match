@@ -28,6 +28,24 @@ class PatientProfile(BaseModel):
     assumptions: list[str] = []
 
 
+class NearestSite(BaseModel):
+    facility: str | None = None
+    city: str | None = None
+    state: str | None = None
+    distance_mi: float
+
+
+class TrialSummary(BaseModel):
+    nct_id: str
+    title: str
+    phase: list[str] = []
+    status: str
+    interventions: list[str] = []
+    site_count: int = 0
+    nearest_site: NearestSite | None = None
+    has_central_contact: bool = False
+
+
 class EligibilityRule(BaseModel):
     rule_id: str
     kind: str  # "inclusion" | "exclusion"
