@@ -1,3 +1,4 @@
+import { TierIcon } from './icons'
 import './TierSummaryRow.css'
 
 const TIER_ORDER = ['High', 'Moderate', 'Low', 'Unclear', 'Blocked']
@@ -10,6 +11,9 @@ export default function TierSummaryRow({ counts }) {
     <div className="tier-summary-row">
       {entries.map((tier) => (
         <span key={tier} className={`tier-pill tier-pill--${tier.toLowerCase()}`}>
+          <span className="tier-pill-icon">
+            <TierIcon tier={tier} />
+          </span>
           {tier}
           <strong>{counts[tier]}</strong>
         </span>

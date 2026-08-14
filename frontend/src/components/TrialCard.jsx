@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import CriterionChecklist from './CriterionChecklist'
+import { TierIcon } from './icons'
 import './TrialCard.css'
 
 const STATUS_LABEL = {
@@ -37,7 +38,12 @@ export default function TrialCard({ trial, onSelectTrial, onOpenCompose }) {
   return (
     <div className={`trial-card trial-card--${tier.toLowerCase()}`}>
       <div className="trial-card-top">
-        <span className={`status-label status-label--${tier.toLowerCase()}`}>{statusLabel}</span>
+        <span className={`status-label status-label--${tier.toLowerCase()}`}>
+          <span className="status-label-icon">
+            <TierIcon tier={tier} />
+          </span>
+          {statusLabel}
+        </span>
         <span className="phase-badge">{(summary.phase || []).join(', ') || 'Phase n/a'}</span>
       </div>
 

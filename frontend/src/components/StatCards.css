@@ -25,6 +25,33 @@
   color: var(--accent-contrast);
 }
 
+.stat-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  margin-bottom: 4px;
+  border-radius: var(--radius-sm);
+  background: var(--chip-blue);
+  color: var(--chip-blue-fg);
+}
+
+.stat-card-icon svg {
+  width: 16px;
+  height: 16px;
+}
+
+.stat-card-icon--primary {
+  background: rgba(255, 255, 255, 0.2);
+  color: var(--accent-contrast);
+}
+
+.stat-card-icon--blue {
+  background: var(--chip-blue);
+  color: var(--chip-blue-fg);
+}
+
 .stat-card-number {
   font-size: 32px;
   font-weight: 600;

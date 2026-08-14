@@ -1,5 +1,5 @@
 :root {
-  --bg: #f6f6fb;
+  --bg: #eceefa;
   --surface: #ffffff;
   --surface-muted: #f0f0f8;
   --text: #23232f;
@@ -25,6 +25,8 @@
   --chip-pink-fg: #c14b74;
   --chip-blue: #e8f1fd;
   --chip-blue-fg: #3768ad;
+  --chip-amber: #fbf1dc;
+  --chip-amber-fg: #96731a;
 
   --tier-high: #16794f;
   --tier-high-bg: #e5f4ec;
@@ -41,8 +43,8 @@
   --fail: #b3261e;
   --unknown: #9a6a00;
 
-  --shadow: 0 1px 2px rgba(40, 40, 70, 0.06), 0 6px 16px rgba(40, 40, 70, 0.07);
-  --radius: 16px;
+  --shadow: 0 1px 3px rgba(40, 40, 70, 0.08), 0 10px 26px rgba(40, 40, 70, 0.1);
+  --radius: 20px;
   --radius-sm: 10px;
   --radius-pill: 999px;
 
@@ -89,6 +91,8 @@
     --chip-pink-fg: #f0a7c1;
     --chip-blue: #1e2c40;
     --chip-blue-fg: #92bdf0;
+    --chip-amber: #332a13;
+    --chip-amber-fg: #e3b341;
 
     --tier-high: #4fd48f;
     --tier-high-bg: #17301f;

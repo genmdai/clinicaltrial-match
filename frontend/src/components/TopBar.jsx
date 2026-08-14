@@ -1,9 +1,13 @@
+import { PathwayMark } from './icons'
 import './TopBar.css'
 
 export default function TopBar({ onNewSearch, showBackToMatches, onBackToMatches, offline }) {
   return (
     <header className="top-bar">
       <div className="top-bar-left">
+        <span className="top-bar-mark">
+          <PathwayMark className="top-bar-mark-icon" />
+        </span>
         <span className="top-bar-wordmark">Pathway</span>
         {showBackToMatches && (
           <button type="button" className="top-bar-nav-item" onClick={onBackToMatches}>

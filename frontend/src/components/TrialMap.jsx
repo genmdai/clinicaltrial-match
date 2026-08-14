@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from 'react'
-import { AttributionControl, MapContainer, Marker, Popup, TileLayer, ZoomControl, useMap } from 'react-leaflet'
+import { AttributionControl, MapContainer, Marker, Polyline, Popup, TileLayer, ZoomControl, useMap } from 'react-leaflet'
 import L from 'leaflet'
+import { TIER_ICON_HTML } from './tierIconPaths'
 import './TrialMap.css'
 
 // Matches TIER_ORDER in TierSummaryRow.jsx — best outcome first, used to pick
@@ -25,14 +26,58 @@ function haversineMiles(lat1, lon1, lat2, lon2) {
   return 2 * R * Math.asin(Math.sqrt(a))
 }
 
-function siteIcon(tier, isFocused) {
+function siteIcon(tier, count, isFocused) {
+  const glyph = TIER_ICON_HTML[tier] || TIER_ICON_HTML.Unclear
+  const countBadge = count > 1 ? `<span class="trial-marker-count">${count}</span>` : ''
   return L.divIcon({
     className: 'trial-marker-wrapper',
-    html: `<span class="trial-marker trial-marker--${tier.toLowerCase()}${isFocused ? ' trial-marker--focused' : ''}"></span>`,
-    iconSize: [22, 22],
-    iconAnchor: [11, 22],
-    popupAnchor: [0, -20],
+    html:
+      `<span class="trial-marker trial-marker--${tier.toLowerCase()}${isFocused ? ' trial-marker--focused' : ''}">` +
+      `<svg class="trial-marker-glyph" viewBox="0 0 16 16" fill="none" stroke="currentColor" ` +
+      `stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${glyph}</svg></span>${countBadge}`,
+    iconSize: [30, 34],
+    iconAnchor: [15, 34],
+    popupAnchor: [0, -30],
   })
+}
+
+// Renders the patient→site connector as a shallow quadratic-bezier arc
+// (perpendicular offset from the midpoint, scaled to the leg's own length)
+// instead of a straight line — the visual language the reference map uses
+// for hub-to-destination routes. Lat/lon treated as flat Euclidean, which is
+// fine at the ~50mi search radius this map ever actually draws across.
+function arcPoints(from, to, segments = 24) {
+  const [lat1, lon1] = from
+  const [lat2, lon2] = to
+  const midLat = (lat1 + lat2) / 2
+  const midLon = (lon1 + lon2) / 2
+  const dLat = lat2 - lat1
+  const dLon = lon2 - lon1
+  const offsetScale = 0.15
+  // Perpendicular to (dLat, dLon) is (-dLon, dLat); scaling that directly by
+  // offsetScale (rather than normalizing then re-multiplying by the leg's
+  // own length) gives the same result with less arithmetic.
+  const controlLat = midLat - dLon * offsetScale
+  const controlLon = midLon + dLat * offsetScale
+
+  const points = []
+  for (let i = 0; i <= segments; i++) {
+    const t = i / segments
+    const lat = (1 - t) ** 2 * lat1 + 2 * (1 - t) * t * controlLat + t ** 2 * lat2
+    const lon = (1 - t) ** 2 * lon1 + 2 * (1 - t) * t * controlLon + t ** 2 * lon2
+    points.push([lat, lon])
+  }
+  return points
+}
+
+// Resolves a tier's live CSS custom property (light/dark aware) to a
+// concrete color string — Leaflet's SVG renderer sets stroke via
+// setAttribute, which doesn't reliably resolve var() the way a stylesheet
+// rule does, so the color has to be read out and passed in as a literal.
+function tierStrokeColor(tier) {
+  if (typeof window === 'undefined') return '#8891e0'
+  const value = getComputedStyle(document.documentElement).getPropertyValue(`--tier-${tier.toLowerCase()}`)
+  return value.trim() || '#8891e0'
 }
 
 const PATIENT_ICON = L.divIcon({
@@ -108,6 +153,24 @@ export default function TrialMap({ sitePins, patientLocation, focusedTrialId, on
         <AttributionControl position="bottomleft" prefix={false} />
         <MapController points={points} />
 
+        {patientLocation &&
+          sitePins.map((site) => {
+            const tier = bestTier(site.trials)
+            const isFocused = site.trials.some((t) => t.nctId === focusedTrialId)
+            return (
+              <Polyline
+                key={`arc-${site.key}`}
+                positions={arcPoints([patientLocation.lat, patientLocation.lon], [site.lat, site.lon])}
+                pathOptions={{
+                  color: tierStrokeColor(tier),
+                  weight: isFocused ? 2.5 : 1.5,
+                  opacity: isFocused ? 0.75 : 0.3,
+                }}
+                interactive={false}
+              />
+            )
+          })}
+
         {patientLocation && (
           <Marker position={[patientLocation.lat, patientLocation.lon]} icon={PATIENT_ICON}>
             <Popup>Patient location</Popup>
@@ -125,7 +188,7 @@ export default function TrialMap({ sitePins, patientLocation, focusedTrialId, on
             <Marker
               key={site.key}
               position={[site.lat, site.lon]}
-              icon={siteIcon(tier, isFocused)}
+              icon={siteIcon(tier, site.trials.length, isFocused)}
               eventHandlers={
                 site.trials.length === 1 ? { click: () => onSelectTrial(site.trials[0].nctId) } : undefined
               }
