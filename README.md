@@ -1,12 +1,12 @@
 # Pathway
 
-**AI-powered treatment observability and clinical-trial access for patients with serious or rare conditions.**
+**AI-powered treatment Observability and Clinical-Trial Access for Patients**
 
 <p align="center">
   <img src="pathway.png" alt="Pathway">
 </p>
 
-Pathway helps patients, caregivers, and clinicians move from **“What treatment options are left?”** to **“These trials may be relevant, here is why, and here is how to pursue them.”**
+Pathway helps patients, caregivers, and clinicians find and pursue relevant clinical trials which are truly accessible for them
 
 Built with **AWS Strands Agents SDK**, **Claude on Amazon Bedrock**, **ClinicalTrials.gov API v2** and **BrightData**
 
@@ -29,9 +29,9 @@ Built with **AWS Strands Agents SDK**, **Claude on Amazon Bedrock**, **ClinicalT
 
 ## The Problem
 
-### Treatment options exist. Patients often cannot see, understand, or act on them.
+### Treatment options exist BUT Patients often cannot see, understand, or act on them.
 
-For patients with serious or rare conditions, clinical trials may represent one of the few remaining treatment paths. ClinicalTrials.gov can show what studies exist, but it does not solve the harder patient problem: **Which options may actually be relevant to me, and what do I need to do next?**
+For patients with serious or rare conditions, clinical trials may represent one of the few remaining treatment paths. ClinicalTrials.gov can show what studies exist, but it does not solve the harder patient problem: **Which options may actually be accessible to me, and what do I need to do next?**
 
 Patients still have to:
 
@@ -60,19 +60,15 @@ A trial can be scientifically relevant and still be practically inaccessible.
 
 ## Differentiation
 
-### Evidence-first eligibility
+### Evidence-first Eligibility
 
 Every checkable criterion is tied to the **verbatim source text** from the study record. If the evidence is unclear, Pathway returns **UNKNOWN** rather than confidently excluding a patient.
 
-### LLM parses; Python judges
-
-Models handle language understanding. Eligibility verdicts, recomputation, geography, and access scoring are deterministic and reproducible.
-
-### Adaptive screening
+### Adaptive Screening
 
 Pathway asks for the information that matters to the remaining study options instead of forcing every patient through the same questionnaire.
 
-### Access, not just matching
+### Accessibility
 
 Pathway does not stop at *“here are some trials.”* It asks:
 
@@ -132,9 +128,9 @@ Pathway does not stop at *“here are some trials.”* It asks:
 | **React + FastAPI**           | Patient-facing experience and backend orchestration                          |
 
 Pathway avoids fake probability scores. Each study receives a transparent **High / Moderate / Low / Blocked / Unclear** outlook based on:
-* **Eligibility fit**
-* **Recruitment momentum**
-* **Geographic access**
+* **Eligibility Fit**
+* **Recruitment Momentum**
+* **Geographic Access**
 * **Contactability**
 
 A confirmed hard eligibility failure forces **Blocked**. Missing information stays visible as **UNKNOWN**.
@@ -164,12 +160,12 @@ npm run dev
 
 * direct hospital/referral handoff where supported
 
-**Treatment observability**
+**Treatment Observability**
 
 * emerging therapies and drug-development context through sources such as Convoke
 * visibility beyond currently recruiting trials into the broader treatment pipeline
 
-**Clinical-trial intelligence**
+**Clinical-Trial Intelligence**
 
 * aggregate access-barrier analytics
 * recruitment and site-placement intelligence
@@ -177,6 +173,6 @@ npm run dev
 
 ---
 
-### Pathway Thesis
+### Overall Thesis
 
 **Treatment observability should not stop at showing patients what trials exist. It should help them understand which options may be relevant, what is still unknown, and how to take the next step toward access.**
