@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
-import { compose, extractProfile, matchTrials, publicAccessLinks, screen } from './api'
+import { useEffect, useReducer, useRef, useState } from 'react'
+import { compose, extractProfile, matchTrials, patchProfile, publicAccessLinks, screen } from './api'
 import AssumptionsCard from './components/AssumptionsCard'
+import { conversationReducer, initialConversationState } from './conversationReducer'
 import ChatIntroCard from './components/ChatIntroCard'
 import ComposeDrawer from './components/ComposeDrawer'
 import LoadingSteps from './components/LoadingSteps'
@@ -55,8 +56,8 @@ function clusterLabel(question) {
 export default function App() {
   const [chatLog, setChatLog] = useState([{ id: uid(), role: 'bot', text: INITIAL_GREETING }])
   const [input, setInput] = useState('')
-  const [profile, setProfile] = useState(null)
-  const [pendingNarrative, setPendingNarrative] = useState(null)
+  const [conv, dispatch] = useReducer(conversationReducer, initialConversationState)
+  const profile = conv.profile
   const [progressMessages, setProgressMessages] = useState([])
   const [parseProgress, setParseProgress] = useState(null)
   const [matching, setMatching] = useState(false)
@@ -174,35 +175,37 @@ export default function App() {
       return
     }
     const extracted = result.profile
-    setProfile(extracted)
-    if (!extracted.condition && !extracted.condition_raw) {
-      setPendingNarrative(text)
-      addMessage('bot', 'I still need to know the diagnosis to search — what condition is this for?')
-      return
-    }
-    if (extracted.condition_needs_clarification && extracted.condition_clarifying_question) {
-      // Condition is only a broad category (e.g. "diabetes" with no type) — searching
-      // now would return a meaningless mix of non-overlapping trials. Same
-      // pendingNarrative pattern as the "no diagnosis at all" case above: the user's
-      // next message gets appended to this one and re-extracted as a whole.
-      setPendingNarrative(text)
-      addMessage('bot', extracted.condition_clarifying_question)
+    dispatch({ type: 'EXTRACTION_RESOLVED', profile: extracted })
+    if ((extracted.gaps ?? []).some((g) => g.required)) {
+      // The structured intake form below now gates the search — no more
+      // concatenating the next chat message onto this narrative and
+      // re-running full extraction on the combined blob. Optional gaps
+      // (e.g. missing biomarker status) don't reach this branch — they're
+      // shown in the form too, but never block a clean narrative from
+      // searching immediately.
+      addMessage('bot', "I need a bit more information before I can search — see the form below.")
       return
     }
     runMatch(extracted)
   }
 
-  const handleUpdateProfile = (updated) => {
-    setProfile(updated)
-    if (updated.condition_needs_clarification && updated.condition_clarifying_question) {
-      // Same gate as extractAndMatch: editing Age/Location here doesn't touch
-      // the Condition field, so an unresolved diagnosis ambiguity (e.g.
-      // "diabetes" with no type) would otherwise reach /match and fail there
-      // instead of just re-asking the question.
-      addMessage('bot', updated.condition_clarifying_question)
+  // A gap answer patches just that field via /patch-profile — never a full
+  // narrative re-extraction. Once no gaps remain, the form's own submit
+  // button (not this handler) advances to /match.
+  const handleResolveGap = async (gapId, field, text) => {
+    const result = await patchProfile(profile, [{ gap_id: gapId, field, text }])
+    if (result.error) {
+      addMessage('bot', `Couldn't save that answer: ${result.error}`)
       return
     }
-    runMatch(updated)
+    dispatch({ type: 'PROFILE_PATCHED', profile: result.profile })
+  }
+
+  // AssumptionsCard's submit button: "Search trials" the first time (gaps
+  // just cleared) or "Update and re-search" on any later manual edit.
+  const handleConfirmProfile = (edited) => {
+    dispatch({ type: 'PROFILE_EDITED', profile: edited })
+    runMatch(edited)
   }
 
   const handleAnswerQuestion = async (answerText) => {
@@ -233,14 +236,6 @@ export default function App() {
     const text = input.trim()
     if (!text) return
     setInput('')
-
-    if (pendingNarrative) {
-      const combined = `${pendingNarrative} ${text}`
-      setPendingNarrative(null)
-      addMessage('user', text)
-      await extractAndMatch(combined)
-      return
-    }
 
     const nq = screenState?.next_question
     if (nq && nq.answer_mode !== 'choice') {
@@ -348,8 +343,7 @@ export default function App() {
     patientLocation.current = { lat: null, lon: null }
     setChatLog([{ id: uid(), role: 'bot', text: INITIAL_GREETING }])
     setInput('')
-    setProfile(null)
-    setPendingNarrative(null)
+    dispatch({ type: 'RESET' })
     setProgressMessages([])
     setMatching(false)
     setSearched(false)
@@ -406,7 +400,7 @@ export default function App() {
                 )}
 
                 {profile && (
-                  <AssumptionsCard profile={profile} onUpdate={handleUpdateProfile} />
+                  <AssumptionsCard profile={profile} onResolveGap={handleResolveGap} onConfirm={handleConfirmProfile} />
                 )}
 
                 {(matching || progressMessages.length > 0) && (

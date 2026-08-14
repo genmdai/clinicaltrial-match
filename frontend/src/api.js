@@ -45,6 +45,18 @@ export async function matchTrials(profile, radiusMi, onEvent) {
   }
 }
 
+// Patches only the profile fields targeted by `answers` — never re-runs full
+// narrative extraction on concatenated text (each answer resolves one open
+// ProfileGap from `profile.gaps`).
+export async function patchProfile(profile, answers) {
+  const res = await fetch(`${BASE_URL}/patch-profile`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ profile, answers }),
+  })
+  return res.json()
+}
+
 // Stateless adaptive-narrowing step: resend the FULL ordered answer list every
 // time (never a delta) so retracting an earlier answer is just "call with one
 // fewer entry" — the backend replays from baseProfile, never patches forward.

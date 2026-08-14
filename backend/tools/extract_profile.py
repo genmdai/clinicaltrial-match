@@ -43,17 +43,47 @@ normalized version (e.g. "non-small cell lung cancer") — leave condition null 
 can't normalize it confidently, but still keep condition_raw. location_zip holds \
 WHATEVER location detail was given — a ZIP/postal code, or a city/region/country \
 (e.g. "Paris, France", "SW1A 1AA, UK") — not just US ZIP codes.
-- condition_needs_clarification / condition_clarifying_question: set \
-condition_needs_clarification=true when condition_raw names only a broad diagnostic \
-category that has clinically distinct subtypes materially affecting which trials would \
-even apply (e.g. "diabetes" — Type 1 vs Type 2 vs gestational are different diseases \
-with non-overlapping trials; "cancer" with no organ/type; "hepatitis" with no A/B/C) \
-AND no such subtype/detail was given anywhere in the narrative. When true, \
-condition_clarifying_question is ONE natural yes/no-or-short-answer question that would \
-resolve it (e.g. "What type of diabetes does the patient have — Type 1, Type 2, or \
-gestational?"). Both stay false/null once the narrative already gives enough specificity \
-(e.g. "type 2 diabetes", "non-small cell lung cancer") or condition_raw itself is empty \
-(nothing to clarify yet — that's a separate "no diagnosis at all" case).
+- condition_needs_clarification / condition_clarifying_question: ALWAYS leave both \
+false/null — they are computed automatically afterward from your `gaps` list below. Do \
+NOT set them yourself.
+- gaps: list of ProfileGap objects — everything worth asking the patient before the \
+profile is ready to search trials with. Each has: gap_id (short stable slug, e.g. \
+"condition_subtype", "ecog", "biomarker_status"), field (the PatientProfile attribute \
+it targets, e.g. "condition", "ecog", "biomarkers"), reason ("ambiguous" if something \
+WAS stated but underspecified, "missing" if it's simply not mentioned at all), label \
+(ONE natural question, in your own words, that would resolve it), answer_mode (pick \
+whichever fits best: "choice", "yes_no_notsure", "no_or_specify", or "free_text"), \
+options (short answer options YOU propose, only when answer_mode=="choice" — e.g. \
+["Type 1", "Type 2", "Gestational", "Not sure"] for a diabetes-type question; empty \
+list for every other answer_mode — never leave option generation to a hardcoded table, \
+you decide the options per narrative), example_quote (a short verbatim snippet from the \
+narrative motivating the question, or null), required (true ONLY for field="condition" \
+gaps — searching is genuinely meaningless without a resolvable diagnosis, so these \
+block the search until answered. ALWAYS false for every other field: a missing ECOG or \
+biomarker status doesn't invalidate the search, it just means those specific trial \
+criteria show up as an honest "unknown, confirm with the trial team" instead of a \
+guess — asking is still worth doing, just never worth blocking a clean, well-specified \
+narrative like "68F, NSCLC, progressed on Keytruda, zip 10001" from searching \
+immediately).
+  - No diagnosis at all: if condition_raw is empty (the narrative never names any \
+condition), create exactly one gap with field="condition", reason="missing", \
+answer_mode="free_text", label="What condition is this for?" (or a natural variant). \
+This is the ONLY gap you should produce in that case — every other field is moot until \
+there's a diagnosis to search on.
+  - Condition ambiguity: otherwise, create exactly one gap with field="condition", \
+reason="ambiguous" whenever condition_raw names only a broad diagnostic category with \
+clinically distinct subtypes materially affecting which trials apply (e.g. "diabetes" — \
+Type 1 vs Type 2 vs gestational are different diseases with non-overlapping trials; \
+"cancer" with no organ/type; "hepatitis" with no A/B/C) AND no such subtype/detail was \
+given anywhere in the narrative. Do NOT create this gap once the narrative already gives \
+enough specificity (e.g. "type 2 diabetes", "non-small cell lung cancer").
+  - Missing-field gaps: only once the condition itself is specific enough to search, you \
+may add up to 2 more gaps (reason="missing") for fields genuinely material to matching \
+that were never mentioned — e.g. ECOG performance status for an oncology condition, \
+biomarker status when a targeted-therapy class is relevant, whether prior treatment \
+count is 0 vs. simply unknown. Never invent more than 3 gaps total. Most narratives \
+should produce 0 or 1 gap, not a checklist — only ask about fields that would \
+meaningfully change which trials are relevant, and when in doubt ask fewer, not more.
 - biomarkers: list of strings. If a biomarker is mentioned but status is unclear, keep \
 that explicit, e.g. "EGFR unknown" rather than omitting it.
 - prior_treatments: one entry per distinct treatment mentioned.
@@ -119,8 +149,10 @@ Keytruda.", "Interpreted 'scans got worse' as disease progression."]
 --- Worked example 3 (adversarial vagueness — mostly nulls) ---
 Narrative: "grandma is sick with cancer"
 subject="relative", relation="grandmother", age=null, sex=null, condition=null, condition_raw="cancer", \
-biomarkers=[], prior_treatments=[], treatment_line=null, condition_needs_clarification=true, \
-condition_clarifying_question="What type of cancer does she have?", assumptions=["Condition is \
+biomarkers=[], prior_treatments=[], treatment_line=null, condition_needs_clarification=false, \
+condition_clarifying_question=null, gaps=[{gap_id: "condition_subtype", field: "condition", \
+reason: "ambiguous", label: "What type of cancer does she have?", answer_mode: "free_text", \
+options: [], example_quote: "cancer", required: true}], assumptions=["Condition is \
 only described as 'cancer' with no type, stage, or treatment history given — treated \
 as unknown rather than guessed.", "Follow-up needed: what type of cancer, and has she \
 had any treatment?"]
@@ -128,18 +160,46 @@ had any treatment?"]
 --- Worked example 4 (non-oncology, only condition mentioned -> primary, not comorbidity) ---
 Narrative: "I have diabetes, I'm 55, zip 94061"
 subject="self", relation=null, age=55, condition=null, condition_raw="diabetes", \
-comorbidities=[], location_zip="94061", condition_needs_clarification=true, \
-condition_clarifying_question="What type of diabetes does the patient have — Type 1, \
-Type 2, or gestational?", assumptions=["Diabetes is the only condition mentioned, so \
-it's treated as the primary diagnosis, not a comorbidity.", "Type of diabetes (Type 1, \
-Type 2, gestational) is needed since eligible trials differ sharply by type."]
+comorbidities=[], location_zip="94061", condition_needs_clarification=false, \
+condition_clarifying_question=null, gaps=[{gap_id: "condition_subtype", field: "condition", \
+reason: "ambiguous", label: "What type of diabetes does the patient have?", \
+answer_mode: "choice", options: ["Type 1", "Type 2", "Gestational", "Not sure"], \
+example_quote: "I have diabetes", required: true}], assumptions=["Diabetes is the only \
+condition mentioned, so it's treated as the primary diagnosis, not a comorbidity.", \
+"Type of diabetes (Type 1, Type 2, gestational) is needed since eligible trials differ \
+sharply by type."]
 
 --- Worked example 5 (specific subtype already given -> no clarification needed) ---
 Narrative: "I have type 2 diabetes, 60 years old, live in Paris, France"
 subject="self", age=60, condition="type 2 diabetes", condition_raw="type 2 diabetes", \
 comorbidities=[], location_zip="Paris, France", condition_needs_clarification=false, \
-condition_clarifying_question=null, assumptions=["Type 2 diabetes is specific enough to \
-search trials directly — no clarification needed."]
+condition_clarifying_question=null, gaps=[], assumptions=["Type 2 diabetes is specific \
+enough to search trials directly — no clarification needed."]
+
+--- Worked example 6 (condition specific, but a material field is simply missing) ---
+Narrative: "I was just diagnosed with non-small cell lung cancer, I'm 62, haven't \
+started any treatment"
+subject="self", age=62, condition="non-small cell lung cancer", \
+condition_raw="non-small cell lung cancer", treatment_line=0, biomarkers=[], ecog=null, \
+condition_needs_clarification=false, condition_clarifying_question=null, \
+gaps=[{gap_id: "biomarker_status", field: "biomarkers", reason: "missing", \
+label: "Has she had biomarker testing done, like EGFR, ALK, or PD-L1?", \
+answer_mode: "yes_no_notsure", options: [], example_quote: null, required: false}], \
+assumptions=["Explicit 'haven't started any treatment' means treatment_line=0, not \
+unknown.", "No biomarker testing mentioned — many NSCLC trials require specific \
+biomarker status, so this is worth asking rather than assuming untested."]
+
+--- Worked example 7 (no diagnosis mentioned at all) ---
+Narrative: "she's 68 and has been on Keytruda for a year"
+subject="relative", relation=null, age=68, condition=null, condition_raw=null, \
+prior_treatments=[{raw_mention: "Keytruda for a year", drug_brand: "Keytruda", \
+drug_generic: "pembrolizumab", drug_class: "anti-PD-1 checkpoint inhibitor", \
+outcome: null, inferred: false, confidence: "high"}], condition_needs_clarification=false, \
+condition_clarifying_question=null, gaps=[{gap_id: "condition_missing", field: "condition", \
+reason: "missing", label: "What condition is this for?", answer_mode: "free_text", \
+options: [], example_quote: null, required: true}], assumptions=["No condition was \
+named anywhere in the narrative — every other field is on hold until there's a \
+diagnosis to search trials against."]
 """
 
 
@@ -226,12 +286,23 @@ def _reconcile(profile: PatientProfile, narrative: str) -> PatientProfile:
     if treatment_line is None and reconciled:
         treatment_line = len(reconciled)
 
+    # Cap defensively — the prompt asks for at most 3, but never trust the LLM
+    # as the sole enforcement of "don't ask a wall of questions."
+    gaps = profile.gaps[:3]
+    condition_gap = next((g for g in gaps if g.field == "condition"), None)
+
     return profile.model_copy(update={
         "prior_treatments": reconciled,
         "subject": subject,
         "relation": relation,
         "treatment_line": treatment_line,
         "assumptions": [*profile.assumptions, *extra_assumptions],
+        "gaps": gaps,
+        # Legacy fields are a pure projection of gaps — single source of
+        # truth, so evals/cases.json's existing assertions keep passing
+        # regardless of how the richer gaps list evolves.
+        "condition_needs_clarification": condition_gap is not None,
+        "condition_clarifying_question": condition_gap.label if condition_gap else None,
     })
 
 

@@ -14,6 +14,29 @@ class PriorTreatment(BaseModel):
     rxnorm_ingredient: str | None = None
 
 
+class ProfileGap(BaseModel):
+    """A single thing the agent needs from the patient before the profile is
+    search-ready: either an ambiguous inferred field (e.g. condition subtype)
+    or a field material to matching that's simply missing (e.g. ECOG).
+
+    label/answer_mode/options are LLM-authored per-narrative — never a
+    hardcoded per-field option table in Python (P5-adjacent: keep one
+    dynamic mechanism instead of enumerating special cases).
+    """
+
+    gap_id: str
+    field: str  # "condition" | "ecog" | "biomarkers" | "prior_treatments"
+    # | "comorbidities" | "treatment_line" | "sex" | "age" | "location_zip"
+    reason: str  # "ambiguous" | "missing"
+    label: str  # the question text, LLM-authored
+    answer_mode: str  # "choice" | "yes_no_notsure" | "no_or_specify" | "free_text"
+    # — reuses next_question.py's existing vocabulary so one input renderer
+    # can serve both pre-search and post-search clarification
+    options: list[str] = []  # LLM-proposed, only when answer_mode == "choice"
+    example_quote: str | None = None  # optional grounding text from the narrative
+    required: bool = True  # false = worth asking but doesn't block the form
+
+
 class PatientProfile(BaseModel):
     subject: str  # "self" | "relative"
     relation: str | None = None  # "mother" | "father" | "sister" | ... — only set
@@ -27,6 +50,8 @@ class PatientProfile(BaseModel):
     condition_needs_clarification: bool = False  # true when condition_raw names only
     # a broad category with clinically distinct subtypes (e.g. "diabetes" with no
     # type) that would make a trial search meaningless until resolved
+    # — kept as a derived projection of gaps[0] where field=="condition" so
+    # evals/cases.json's existing assertions keep passing untouched.
     condition_clarifying_question: str | None = None  # set together with the above
     biomarkers: list[str] = []
     prior_treatments: list[PriorTreatment] = []
@@ -38,6 +63,8 @@ class PatientProfile(BaseModel):
     other_facts: dict[str, str] = {}  # topic slug -> "yes" | "no" | "unclear",
     # e.g. {"brain_metastases": "no"} — patient-reported answers to dynamically
     # extracted field="other" criteria (see EligibilityRule.topic)
+    gaps: list[ProfileGap] = []  # everything the structured intake form still
+    # needs from the patient; empty ⇒ profile is search-ready as-is
 
 
 class NearestSite(BaseModel):

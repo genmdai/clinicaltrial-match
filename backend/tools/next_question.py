@@ -114,6 +114,9 @@ def _build_eligibility_question(key: str, entries: list[tuple[str, EligibilityRu
     affected = sorted({e[0] for e in entries})
     return {
         "cluster_key": key,
+        "gap_id": key,  # alias so the frontend can render this via the same
+        # GapInput component it uses for pre-search ProfileGaps, without this
+        # module's tested decides_count/tiebreak logic changing at all
         "field": rule.field,
         "rule_id": rule.rule_id,
         "label": verdict.follow_up_question,
@@ -143,11 +146,13 @@ def travel_radius_question(open_trials: list[dict], patient_lat: float | None, p
         return None
     return {
         "cluster_key": TRAVEL_RADIUS_CLUSTER_KEY,
+        "gap_id": TRAVEL_RADIUS_CLUSTER_KEY,
         "field": TRAVEL_RADIUS_CLUSTER_KEY,
         "rule_id": None,
         "label": "How far could you travel for study visits?",
         "answer_mode": "choice",
         "choices": RADIUS_CHOICES,
+        "options": RADIUS_CHOICES,  # alias — GapInput reads `options`
         "decides_count": len(affected),
         "total_open": len(open_trials),
         "affected_trial_ids": sorted(t["nct_id"] for t in affected),

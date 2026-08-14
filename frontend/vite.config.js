@@ -8,6 +8,7 @@ export default defineConfig({
     proxy: {
       '/health': 'http://127.0.0.1:8123',
       '/extract': 'http://127.0.0.1:8123',
+      '/patch-profile': 'http://127.0.0.1:8123',
       '/match': 'http://127.0.0.1:8123',
       '/screen': 'http://127.0.0.1:8123',
       '/compose': 'http://127.0.0.1:8123',

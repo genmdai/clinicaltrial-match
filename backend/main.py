@@ -32,6 +32,7 @@ from .api_models import (
     ComposeRequest,
     ExtractRequest,
     MatchRequest,
+    PatchProfileRequest,
     PublicAccessLinksRequest,
     ScreenRequest,
 )
@@ -40,6 +41,7 @@ from .tools.access_outlook import access_outlook
 from .tools.check_eligibility import check_eligibility
 from .tools.compose import compose_doctor_note, compose_email
 from .tools.extract_profile import extract_profile
+from .tools.patch_profile import patch_profile
 from .tools.fetch_trial import fetch_trial, get_contact
 from .tools.geo import nearest_sites, resolve_location
 from .tools.next_question import (
@@ -65,6 +67,11 @@ def health():
 @app.post("/extract")
 def extract(payload: ExtractRequest) -> dict:
     return extract_profile(payload.narrative)
+
+
+@app.post("/patch-profile")
+def patch_profile_endpoint(payload: PatchProfileRequest) -> dict:
+    return patch_profile(payload.profile, [a.model_dump() for a in payload.answers])
 
 
 def _sse(event: dict) -> str:

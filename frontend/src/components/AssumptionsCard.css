@@ -20,10 +20,146 @@
   color: var(--text-muted);
 }
 
-.assumption-chips {
+.assumption-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12.5px;
+  color: var(--text-muted);
+}
+
+.assumption-section {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.assumption-section-label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.assumption-section-label input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--text);
+  background: var(--surface);
+  font-weight: 400;
+}
+
+.repeatable-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.repeatable-row input,
+.repeatable-row select {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 13.5px;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.repeatable-row input {
+  flex: 1;
+}
+
+.row-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 6px;
+  border-radius: 50%;
+}
+
+.row-remove:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.inferred-badge {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+  white-space: nowrap;
+}
+
+.btn-link {
+  align-self: flex-start;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 0;
+}
+
+.tag-row {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.tag-add-input {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 8px;
+  font-size: 13.5px;
+  color: var(--text);
+  background: var(--surface);
+}
+
+.gap-block {
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.gap-badge {
+  align-self: flex-start;
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 2px 6px;
+}
+
+.gap-badge--optional {
+  color: var(--text-muted);
+  background: var(--surface-muted);
+}
+
+.gap-block:has(.gap-badge--optional) {
+  background: var(--surface-muted);
+}
+
+.gap-question {
+  font-size: 13.5px;
+  font-weight: 600;
+  margin: 0;
 }
 
 .chip {

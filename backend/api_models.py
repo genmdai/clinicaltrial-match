@@ -14,6 +14,17 @@ class MatchRequest(BaseModel):
     radius_mi: float = 50.0
 
 
+class GapAnswer(BaseModel):
+    gap_id: str
+    field: str
+    text: str
+
+
+class PatchProfileRequest(BaseModel):
+    profile: dict  # the full profile as already extracted — never overwritten
+    answers: list[GapAnswer]  # one or more answers to specific open gaps
+
+
 class ScreenTrial(BaseModel):
     """One candidate trial's data as already cached client-side from `/match`'s
     `trial_ready` event — resent on every `/screen` call since the backend is
