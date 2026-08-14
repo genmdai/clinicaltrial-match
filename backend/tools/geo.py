@@ -5,10 +5,14 @@ access_outlook.py rather than called directly by the agent.
 """
 
 import csv
+import re
 from math import asin, cos, radians, sin, sqrt
 from pathlib import Path
 
+from . import _geocode_client
+
 EARTH_RADIUS_MI = 3958.8
+_US_ZIP_RE = re.compile(r"^\d{5}(-\d{4})?$")
 
 _ZIP_CSV_PATH = Path(__file__).resolve().parents[1] / "data" / "zip_latlon.csv"
 _zip_index: dict[str, dict] | None = None
@@ -51,6 +55,26 @@ def zip_to_latlon(zip_code: str) -> dict | None:
         return None
     index = _load_zip_index()
     return index.get(zip_code.strip().zfill(5))
+
+
+def resolve_location(text: str, offline: bool | None = None) -> dict | None:
+    """Resolve a patient-entered location — a US ZIP or free text like "Paris,
+    France" / "SW1A 1AA, UK" — to lat/lon (+ city/state if known).
+
+    Tries the local US ZIP table first (fast, offline, no network) whenever
+    `text` looks like a 5-digit ZIP; everything else (and any 5-digit-looking
+    text that isn't actually in the table) falls back to a geocoding API call.
+    Returns None (never raises) when nothing resolves — same "graceful
+    unrecognized location" contract as zip_to_latlon (CLAUDE.md §6).
+    """
+    if not text:
+        return None
+    text = text.strip()
+    if _US_ZIP_RE.match(text):
+        coords = zip_to_latlon(text)
+        if coords:
+            return coords
+    return _geocode_client.geocode(text, offline=offline)
 
 
 def nearest_recruiting_distance_mi(

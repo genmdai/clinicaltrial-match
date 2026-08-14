@@ -8,8 +8,8 @@ function fieldLabel(profile) {
 
 // No longer a confirm-before-search gate (P4 still requires inferred facts
 // stay visible/editable — it just can't block the first search anymore).
-// Editing age/condition/ZIP re-runs the whole match, since those change what
-// the search itself finds, not just narrowing an existing candidate set.
+// Editing age/condition/location re-runs the whole match, since those change
+// what the search itself finds, not just narrowing an existing candidate set.
 export default function AssumptionsCard({ profile, onUpdate }) {
   const [draft, setDraft] = useState(profile)
   const [dismissed, setDismissed] = useState(() => new Set())
@@ -66,16 +66,23 @@ export default function AssumptionsCard({ profile, onUpdate }) {
           <input
             type="text"
             value={draft.condition ?? draft.condition_raw ?? ''}
-            onChange={(e) => update('condition', e.target.value)}
+            onChange={(e) =>
+              // A manual edit is the user directly resolving any ambiguity the
+              // extraction flagged (e.g. filling in "type 2 diabetes") — clear the
+              // clarification gate so "Update and re-search" isn't blocked again.
+              setDraft((d) => ({
+                ...d, condition: e.target.value, condition_needs_clarification: false, condition_clarifying_question: null,
+              }))
+            }
           />
         </label>
         <label>
-          ZIP code
+          Location
           <input
             type="text"
             value={draft.location_zip ?? ''}
             onChange={(e) => update('location_zip', e.target.value)}
-            placeholder="optional, for nearby sites"
+            placeholder="ZIP code, or city/country — optional, for nearby sites"
           />
         </label>
       </div>

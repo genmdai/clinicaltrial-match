@@ -41,7 +41,7 @@ from .tools.check_eligibility import check_eligibility
 from .tools.compose import compose_doctor_note, compose_email
 from .tools.extract_profile import extract_profile
 from .tools.fetch_trial import fetch_trial, get_contact
-from .tools.geo import nearest_sites, zip_to_latlon
+from .tools.geo import nearest_sites, resolve_location
 from .tools.next_question import (
     TRAVEL_RADIUS_CLUSTER_KEY,
     fold_ledger,
@@ -71,11 +71,11 @@ def _sse(event: dict) -> str:
     return f"data: {json.dumps(event)}\n\n"
 
 
-def _resolve_patient_location(profile: dict) -> tuple[float | None, float | None]:
-    zip_code = profile.get("location_zip")
-    if not zip_code:
+def _resolve_patient_location(profile: dict, offline: bool) -> tuple[float | None, float | None]:
+    location_text = profile.get("location_zip")
+    if not location_text:
         return None, None
-    coords = zip_to_latlon(zip_code)
+    coords = resolve_location(location_text, offline=offline)
     return (coords["lat"], coords["lon"]) if coords else (None, None)
 
 
@@ -91,14 +91,22 @@ async def match(payload: MatchRequest):
                            "— could you say more about the condition?",
             })
             return
+        if profile.get("condition_needs_clarification") and profile.get("condition_clarifying_question"):
+            # The condition is only a broad category (e.g. "diabetes" with no type) —
+            # searching now would return a meaningless mix of non-overlapping trials.
+            # Mirrors the "no condition at all" bail-out above; a caller that wants to
+            # search anyway can clear this flag on the profile it resends (the
+            # frontend does this once the user directly edits/confirms the condition).
+            yield _sse({"type": "error", "message": profile["condition_clarifying_question"]})
+            return
 
-        patient_lat, patient_lon = _resolve_patient_location(profile)
+        offline_mode = os.environ.get("OFFLINE") == "1"
+        patient_lat, patient_lon = _resolve_patient_location(profile, offline_mode)
 
         # Fixed narration stages surfaced in the UI (ProgressStream / LoadingSteps) —
         # keep this exact wording in sync with frontend/src/components/ProgressStream.jsx.
         yield _sse({"type": "progress", "message": "Searching recruiting trials…"})
 
-        offline_mode = os.environ.get("OFFLINE") == "1"
         search_result = search_trials(
             condition, lat=patient_lat, lon=patient_lon, radius_mi=payload.radius_mi, offline=offline_mode,
         )

@@ -1,4 +1,7 @@
-from backend.tools.geo import haversine_miles, nearest_sites, zip_to_latlon
+import json
+
+from backend.tools import _geocode_client
+from backend.tools.geo import haversine_miles, nearest_sites, resolve_location, zip_to_latlon
 
 
 def test_haversine_zero_distance():
@@ -47,3 +50,36 @@ def test_zip_to_latlon_unknown_zip_returns_none_not_raise():
 def test_zip_to_latlon_handles_short_zip_via_zfill():
     coords = zip_to_latlon("1001")  # missing leading zero
     assert coords is None or isinstance(coords["lat"], float)
+
+
+# --- resolve_location: US ZIP fast path + international geocoding fallback ---
+
+def test_resolve_location_uses_us_zip_fast_path_without_network():
+    # A recognized US ZIP must resolve via the local table alone — no geocode
+    # cache entry seeded, so this only passes if the network path was never hit.
+    coords = resolve_location("43215", offline=True)
+    assert coords is not None
+    assert 39.8 < coords["lat"] < 40.1
+
+
+def test_resolve_location_falls_back_to_geocoder_for_non_zip_text():
+    query = "Paris, France (test fixture)"
+    key = _geocode_client._cache_key(query)
+    cache_file = _geocode_client.CACHE_DIR / f"{key}.json"
+    _geocode_client.CACHE_DIR.mkdir(parents=True, exist_ok=True)
+    cache_file.write_text(json.dumps([{"lat": "48.8566", "lon": "2.3522", "name": "Paris"}]))
+    try:
+        coords = resolve_location(query, offline=True)
+        assert coords is not None
+        assert coords["city"] == "Paris"
+        assert 48.0 < coords["lat"] < 49.5
+    finally:
+        cache_file.unlink(missing_ok=True)
+
+
+def test_resolve_location_offline_cache_miss_returns_none_not_raise():
+    assert resolve_location("a location that was never cached, offline", offline=True) is None
+
+
+def test_resolve_location_empty_text_returns_none():
+    assert resolve_location("", offline=True) is None

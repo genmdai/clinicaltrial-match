@@ -69,8 +69,19 @@ def check_extraction_case(profile: dict, expect: dict) -> list[str]:
         failures.append(f"biomarkers={profile.get('biomarkers')!r} missing keyword {expect['biomarker_keyword']!r}")
     if "comorbidities_keyword" in expect and not any(_icontains(c, expect["comorbidities_keyword"]) for c in profile.get("comorbidities", [])):
         failures.append(f"comorbidities={profile.get('comorbidities')!r} missing keyword {expect['comorbidities_keyword']!r}")
+    if expect.get("comorbidities_empty") and profile.get("comorbidities"):
+        failures.append(f"comorbidities non-empty: {profile.get('comorbidities')!r}, expected empty")
+    if "condition_raw_keyword" in expect and not _icontains(profile.get("condition_raw"), expect["condition_raw_keyword"]):
+        failures.append(f"condition_raw={profile.get('condition_raw')!r} missing keyword {expect['condition_raw_keyword']!r}")
     if expect.get("condition_null") and profile.get("condition") is not None:
         failures.append(f"condition={profile.get('condition')!r}, expected null")
+    if "condition_needs_clarification" in expect and profile.get("condition_needs_clarification") != expect["condition_needs_clarification"]:
+        failures.append(
+            f"condition_needs_clarification={profile.get('condition_needs_clarification')!r}, "
+            f"expected {expect['condition_needs_clarification']!r}"
+        )
+    if expect.get("condition_needs_clarification") and not profile.get("condition_clarifying_question"):
+        failures.append("condition_needs_clarification=true but condition_clarifying_question is empty")
     if expect.get("assumptions_nonempty") and not profile.get("assumptions"):
         failures.append("assumptions is empty, expected non-empty")
     if "class_keywords_present" in expect:

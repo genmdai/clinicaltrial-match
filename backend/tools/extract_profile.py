@@ -40,7 +40,20 @@ someone else (mom, dad, sister, grandma, ...), "self" whenever the speaker is th
 - age, sex, condition, condition_raw, location_zip: leave null if not mentioned. Do \
 NOT guess or fabricate. condition_raw is the patient's own words; condition is your \
 normalized version (e.g. "non-small cell lung cancer") — leave condition null if you \
-can't normalize it confidently, but still keep condition_raw.
+can't normalize it confidently, but still keep condition_raw. location_zip holds \
+WHATEVER location detail was given — a ZIP/postal code, or a city/region/country \
+(e.g. "Paris, France", "SW1A 1AA, UK") — not just US ZIP codes.
+- condition_needs_clarification / condition_clarifying_question: set \
+condition_needs_clarification=true when condition_raw names only a broad diagnostic \
+category that has clinically distinct subtypes materially affecting which trials would \
+even apply (e.g. "diabetes" — Type 1 vs Type 2 vs gestational are different diseases \
+with non-overlapping trials; "cancer" with no organ/type; "hepatitis" with no A/B/C) \
+AND no such subtype/detail was given anywhere in the narrative. When true, \
+condition_clarifying_question is ONE natural yes/no-or-short-answer question that would \
+resolve it (e.g. "What type of diabetes does the patient have — Type 1, Type 2, or \
+gestational?"). Both stay false/null once the narrative already gives enough specificity \
+(e.g. "type 2 diabetes", "non-small cell lung cancer") or condition_raw itself is empty \
+(nothing to clarify yet — that's a separate "no diagnosis at all" case).
 - biomarkers: list of strings. If a biomarker is mentioned but status is unclear, keep \
 that explicit, e.g. "EGFR unknown" rather than omitting it.
 - prior_treatments: one entry per distinct treatment mentioned.
@@ -71,9 +84,13 @@ diagnosed", "treatment-naive"), set treatment_line=0.
 treatment_line null — do not assume 0.
 - ecog: integer ECOG performance status ONLY if explicitly stated (e.g. "ECOG 1"). \
 Otherwise null.
-- comorbidities: list any significant medical conditions mentioned that are NOT the \
-primary condition being treated (e.g. "heart failure", "diabetes"). Empty list if none \
-mentioned.
+- comorbidities: list any significant medical conditions mentioned ADDITIONAL to a \
+DISTINCT primary diagnosis already identified in condition/condition_raw (e.g. "heart \
+failure" alongside melanoma, "high blood pressure" alongside lung cancer). If only ONE \
+condition is mentioned in the whole narrative, that condition is the primary diagnosis \
+(condition/condition_raw) — never a comorbidity, even if it's a condition (like \
+diabetes or hypertension) that's often secondary in other contexts. Empty list if no \
+second condition is mentioned.
 - assumptions: a plain-English sentence for EVERY inference you made (outcome \
 inference, subject inference, drug identification, normalized condition, etc.) so a \
 human can review and correct it. If information is too vague to extract most fields, \
@@ -102,10 +119,27 @@ Keytruda.", "Interpreted 'scans got worse' as disease progression."]
 --- Worked example 3 (adversarial vagueness — mostly nulls) ---
 Narrative: "grandma is sick with cancer"
 subject="relative", relation="grandmother", age=null, sex=null, condition=null, condition_raw="cancer", \
-biomarkers=[], prior_treatments=[], treatment_line=null, assumptions=["Condition is \
+biomarkers=[], prior_treatments=[], treatment_line=null, condition_needs_clarification=true, \
+condition_clarifying_question="What type of cancer does she have?", assumptions=["Condition is \
 only described as 'cancer' with no type, stage, or treatment history given — treated \
 as unknown rather than guessed.", "Follow-up needed: what type of cancer, and has she \
 had any treatment?"]
+
+--- Worked example 4 (non-oncology, only condition mentioned -> primary, not comorbidity) ---
+Narrative: "I have diabetes, I'm 55, zip 94061"
+subject="self", relation=null, age=55, condition=null, condition_raw="diabetes", \
+comorbidities=[], location_zip="94061", condition_needs_clarification=true, \
+condition_clarifying_question="What type of diabetes does the patient have — Type 1, \
+Type 2, or gestational?", assumptions=["Diabetes is the only condition mentioned, so \
+it's treated as the primary diagnosis, not a comorbidity.", "Type of diabetes (Type 1, \
+Type 2, gestational) is needed since eligible trials differ sharply by type."]
+
+--- Worked example 5 (specific subtype already given -> no clarification needed) ---
+Narrative: "I have type 2 diabetes, 60 years old, live in Paris, France"
+subject="self", age=60, condition="type 2 diabetes", condition_raw="type 2 diabetes", \
+comorbidities=[], location_zip="Paris, France", condition_needs_clarification=false, \
+condition_clarifying_question=null, assumptions=["Type 2 diabetes is specific enough to \
+search trials directly — no clarification needed."]
 """
 
 

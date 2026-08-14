@@ -15,7 +15,8 @@ import TrialCard from './components/TrialCard'
 import './App.css'
 
 const INITIAL_GREETING =
-  "Tell me about the patient's situation — condition, treatments tried, age, and a ZIP code if you'd like nearby sites."
+  "Tell me about the patient's situation — condition, treatments tried, age, and a " +
+  "location (ZIP code, or city/country) if you'd like nearby sites."
 
 let nextId = 0
 const uid = () => `m${nextId++}`
@@ -152,6 +153,15 @@ export default function App() {
     if (!extracted.condition && !extracted.condition_raw) {
       setPendingNarrative(text)
       addMessage('bot', 'I still need to know the diagnosis to search — what condition is this for?')
+      return
+    }
+    if (extracted.condition_needs_clarification && extracted.condition_clarifying_question) {
+      // Condition is only a broad category (e.g. "diabetes" with no type) — searching
+      // now would return a meaningless mix of non-overlapping trials. Same
+      // pendingNarrative pattern as the "no diagnosis at all" case above: the user's
+      // next message gets appended to this one and re-extracted as a whole.
+      setPendingNarrative(text)
+      addMessage('bot', extracted.condition_clarifying_question)
       return
     }
     runMatch(extracted)

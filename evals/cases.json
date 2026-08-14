@@ -104,7 +104,8 @@
       "age_null": true,
       "condition_null": true,
       "prior_treatments_empty": true,
-      "assumptions_nonempty": true
+      "assumptions_nonempty": true,
+      "condition_needs_clarification": true
     }
   },
   {
@@ -138,6 +139,28 @@
     "expect": {
       "no_fail": true,
       "rollup_prefix_any": ["Possibly eligible", "Looks eligible"]
+    }
+  },
+  {
+    "id": 13,
+    "stage": "extraction",
+    "narrative": "I have diabetes, I'm 55, zip 94061",
+    "expect": {
+      "age": 55,
+      "condition_raw_keyword": "diabetes",
+      "comorbidities_empty": true,
+      "condition_needs_clarification": true
+    }
+  },
+  {
+    "id": 14,
+    "stage": "extraction",
+    "narrative": "I have type 2 diabetes, 60 years old, live in Paris, France",
+    "expect": {
+      "age": 60,
+      "condition_raw_keyword": "diabetes",
+      "comorbidities_empty": true,
+      "condition_needs_clarification": false
     }
   }
 ]

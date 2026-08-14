@@ -24,6 +24,10 @@ class PatientProfile(BaseModel):
     condition: str | None = None
     condition_raw: str | None = None
     condition_code: str | None = None
+    condition_needs_clarification: bool = False  # true when condition_raw names only
+    # a broad category with clinically distinct subtypes (e.g. "diabetes" with no
+    # type) that would make a trial search meaningless until resolved
+    condition_clarifying_question: str | None = None  # set together with the above
     biomarkers: list[str] = []
     prior_treatments: list[PriorTreatment] = []
     treatment_line: int | None = None

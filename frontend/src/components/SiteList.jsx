@@ -2,7 +2,7 @@ import './SiteList.css'
 
 export default function SiteList({ sites }) {
   if (!sites || sites.length === 0) {
-    return <p className="site-list-empty">No nearby site data — add a ZIP code to see distances.</p>
+    return <p className="site-list-empty">No nearby site data — add a location to see distances.</p>
   }
 
   return (
