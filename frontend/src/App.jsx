@@ -82,6 +82,7 @@ export default function App() {
     await new Promise((r) => setTimeout(r, 250))
 
     const clean = results.filter((e) => !e.error && !(e.verdicts || []).some((v) => v.verdict === 'FAIL'))
+    const allErrored = results.length > 0 && results.every((e) => e.error)
     patch((prev) => ({
       stage: 'screening',
       log: [
@@ -89,7 +90,9 @@ export default function App() {
         {
           role: 'TrialPath',
           text: results.length
-            ? `I found ${results.length} candidate ${results.length === 1 ? 'study' : 'studies'}; ${clean.length} still look consistent with what you've told me. A few more details will narrow it further.`
+            ? allErrored
+              ? `I found ${results.length} candidate ${results.length === 1 ? 'study' : 'studies'} on ClinicalTrials.gov, but couldn't check eligibility criteria for any of them (${results[0].error}). That step needs AWS Bedrock access configured on the backend — once that's set up I can re-run this.`
+              : `I found ${results.length} candidate ${results.length === 1 ? 'study' : 'studies'}; ${clean.length} still look consistent with what you've told me. A few more details will narrow it further.`
             : profileRes.error
               ? `I couldn't fully process that (${profileRes.error}). You can still fill in the profile below and I'll search once there's a condition to search for.`
               : "I couldn't find any recruiting studies for that condition — try adjusting the profile below.",
