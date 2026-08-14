@@ -31,11 +31,12 @@ _EXCLUSION_RE = re.compile(r"exclusion criteria:?", re.IGNORECASE)
 _VALID_FIELDS = {"age", "prior_therapy_class", "condition", "biomarker", "treatment_naive", "ecog", "other"}
 _VALID_OPERATORS = {"gte", "lte", "eq", "contains", "not_had", "must_have"}
 
-# Bounds concurrent Bedrock calls across a batch. At the old 5-candidate cap this
-# never mattered; at today's 50-candidate cap (each up to 2 sequential chunk calls),
-# firing all of them at once risks throttling with no backoff anywhere in this
-# module. Env-configurable so a demo can tune it without a code change.
-_PARSE_SEMAPHORE = asyncio.Semaphore(int(os.environ.get("PARSE_CRITERIA_CONCURRENCY", "6")))
+# Bounds concurrent Bedrock calls across a batch. Raised 6 -> 16 alongside the
+# 15 -> 50 MAX_CANDIDATES bump (search_trials.py) to keep the "Comparing
+# eligibility criteria…" stage from taking ~3x longer — trades a higher risk of
+# Bedrock throttling (no backoff anywhere in this module) for less wall-clock
+# time. Env-configurable so a demo can tune it back down without a code change.
+_PARSE_SEMAPHORE = asyncio.Semaphore(int(os.environ.get("PARSE_CRITERIA_CONCURRENCY", "16")))
 
 SYSTEM_PROMPT = """You extract structured eligibility rules from one section (either \
 INCLUSION or EXCLUSION, occasionally unlabeled) of a clinical trial's eligibility \
