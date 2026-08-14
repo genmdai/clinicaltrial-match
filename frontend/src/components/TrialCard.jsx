@@ -1,7 +1,13 @@
 import { useState } from 'react'
 import CriterionChecklist from './CriterionChecklist'
-import SiteList from './SiteList'
 import './TrialCard.css'
+
+const STATUS_LABEL = {
+  High: 'Strong potential match',
+  Moderate: 'Potential match',
+  Low: 'Potential match',
+  Unclear: 'More information needed',
+}
 
 const COMPONENT_LABELS = {
   eligibility_fit: 'Eligibility',
@@ -10,16 +16,20 @@ const COMPONENT_LABELS = {
   contactability: 'Contact',
 }
 
-export default function TrialCard({ trial, onAnswerThis, onOpenCompose }) {
-  const [expanded, setExpanded] = useState(false)
-  const [activeComponent, setActiveComponent] = useState(null)
+// Fixed fill steps per qualitative band, not derived from the raw score —
+// P9: never show a percentage, the bar communicates the band, not a number.
+const BAND_FILL = { strong: '90%', fair: '55%', weak: '20%' }
+const BAND_LABEL = { strong: 'Strong', fair: 'Fair', weak: 'Weak' }
 
-  const { summary, outlook, verdicts, nearest_sites: nearestSites } = trial
+export default function TrialCard({ trial, onSelectTrial, onOpenCompose }) {
+  const [activeComponent, setActiveComponent] = useState(null)
+  const { summary, outlook, verdicts, rules } = trial
   const tier = outlook.tier
   const blockingVerdict = outlook.blocking_rule_id
     ? verdicts.find((v) => v.rule_id === outlook.blocking_rule_id)
     : null
   const nearest = summary.nearest_site
+  const statusLabel = STATUS_LABEL[tier] || tier
   const activeEvidence = activeComponent
     ? outlook.components.find((c) => c.name === activeComponent)?.evidence
     : null
@@ -27,23 +37,30 @@ export default function TrialCard({ trial, onAnswerThis, onOpenCompose }) {
   return (
     <div className={`trial-card trial-card--${tier.toLowerCase()}`}>
       <div className="trial-card-top">
-        <span className={`tier-pill tier-pill--${tier.toLowerCase()}`}>{tier}</span>
-        <div className="component-bars">
-          {outlook.components.map((c) => (
-            <button
-              key={c.name}
-              type="button"
-              className={`component-bar component-bar--${c.band} ${
-                activeComponent === c.name ? 'component-bar--active' : ''
-              }`}
-              onClick={() => setActiveComponent(activeComponent === c.name ? null : c.name)}
-            >
-              {COMPONENT_LABELS[c.name] || c.name}
-            </button>
-          ))}
-        </div>
+        <span className={`status-label status-label--${tier.toLowerCase()}`}>{statusLabel}</span>
+        <span className="phase-badge">{(summary.phase || []).join(', ') || 'Phase n/a'}</span>
       </div>
 
+      {/* All four Access Outlook components, always visible — P9: never a
+          percentage, always the tier + the registry evidence behind it. */}
+      <div className="component-rows">
+        {outlook.components.map((c) => (
+          <button
+            key={c.name}
+            type="button"
+            className={`component-row component-row--${c.band} ${
+              activeComponent === c.name ? 'component-row--active' : ''
+            }`}
+            onClick={() => setActiveComponent(activeComponent === c.name ? null : c.name)}
+          >
+            <span className="component-row-label">{COMPONENT_LABELS[c.name] || c.name}</span>
+            <span className="component-row-track">
+              <span className="component-row-fill" style={{ width: BAND_FILL[c.band] }} />
+            </span>
+            <span className="component-row-band">{BAND_LABEL[c.band] || c.band}</span>
+          </button>
+        ))}
+      </div>
       {activeEvidence && (
         <ul className="component-evidence">
           {activeEvidence.map((line, i) => (
@@ -54,7 +71,6 @@ export default function TrialCard({ trial, onAnswerThis, onOpenCompose }) {
 
       <h3 className="trial-title">{summary.title}</h3>
       <div className="trial-meta">
-        <span className="phase-badge">{(summary.phase || []).join(', ') || 'Phase n/a'}</span>
         <span>{summary.nct_id}</span>
         {nearest && (
           <span>
@@ -72,37 +88,18 @@ export default function TrialCard({ trial, onAnswerThis, onOpenCompose }) {
         </div>
       )}
 
-      {tier === 'Unclear' && (
-        <button className="btn-secondary trial-unclear-cta" onClick={() => setExpanded(true)}>
-          {outlook.open_questions} question{outlook.open_questions !== 1 ? 's' : ''} stand between you and an answer
-        </button>
-      )}
+      {tier !== 'Blocked' && <CriterionChecklist rules={rules} verdicts={verdicts} />}
 
       <p className="trial-caveat">{outlook.caveat}</p>
 
       <div className="trial-actions">
-        <button className="btn-secondary" onClick={() => setExpanded((e) => !e)}>
-          {expanded ? 'Hide details' : 'Show eligibility checklist'}
+        <button type="button" className="btn-secondary" onClick={onSelectTrial}>
+          Look at this trial
         </button>
-        <button className="btn-secondary" onClick={onOpenCompose}>
+        <button type="button" className="btn-secondary" onClick={onOpenCompose}>
           Draft outreach
         </button>
       </div>
-
-      {expanded && (
-        <div className="trial-expanded">
-          <CriterionChecklist
-            verdicts={verdicts}
-            onAnswerThis={(ruleId, question) => onAnswerThis(summary.nct_id, ruleId, question)}
-          />
-          {nearestSites && nearestSites.length > 0 && (
-            <>
-              <h4 className="trial-section-heading">Nearest sites</h4>
-              <SiteList sites={nearestSites} />
-            </>
-          )}
-        </div>
-      )}
     </div>
   )
 }

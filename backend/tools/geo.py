@@ -53,6 +53,26 @@ def zip_to_latlon(zip_code: str) -> dict | None:
     return index.get(zip_code.strip().zfill(5))
 
 
+def nearest_recruiting_distance_mi(
+    locations: list[dict], lat: float | None, lon: float | None
+) -> float | None:
+    """Distance in miles to the nearest individually RECRUITING site, or None if
+    the patient's location isn't known or no site is both geo-located and
+    individually recruiting. Shared by access_outlook.py's geographic_access
+    scoring and next_question.py's travel-radius filter so the two can never
+    disagree about what "nearest recruiting site" means.
+    """
+    if lat is None or lon is None:
+        return None
+    dists = []
+    for loc in locations:
+        geo_point = loc.get("geoPoint")
+        if not geo_point or loc.get("status") != "RECRUITING":
+            continue
+        dists.append(haversine_miles(lat, lon, geo_point["lat"], geo_point["lon"]))
+    return min(dists) if dists else None
+
+
 def nearest_sites(locations: list[dict], lat: float | None, lon: float | None, n: int = 3) -> list[dict]:
     """Sort trial locations by distance from (lat, lon); attach distance_mi.
 

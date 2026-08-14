@@ -15,7 +15,7 @@ from strands import tool
 
 from ..schemas import AccessOutlook, CriterionVerdict, OutlookComponent
 from .fetch_trial import get_contact
-from .geo import haversine_miles
+from .geo import haversine_miles, nearest_recruiting_distance_mi
 
 _SCORE_BY_BAND = {"strong": 1.0, "fair": 0.6, "weak": 0.2}
 
@@ -146,7 +146,7 @@ def _geographic_access(
             evidence=["No individually recruiting site found near the patient."],
         )
 
-    nearest = min(recruiting_dists)
+    nearest = nearest_recruiting_distance_mi(locations, patient_lat, patient_lon)
     within_radius = sum(1 for d in recruiting_dists if d <= radius_mi)
     if nearest < 50:
         band = "strong"

@@ -1,4 +1,4 @@
-# CLAUDE.md — ClinicalCohort: Treatment Observability Agent
+# CLAUDE.md — Pathway: Treatment Observability Agent
 
 One-day hackathon project. Read this file fully before writing any code. When this file
 and your instincts conflict, this file wins. When this file is ambiguous, ASK the human —

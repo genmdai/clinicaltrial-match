@@ -14,19 +14,40 @@ class MatchRequest(BaseModel):
     radius_mi: float = 50.0
 
 
-class AnswerPatch(BaseModel):
-    rule_id: str
-    text: str
-
-
-class RecomputeRequest(BaseModel):
-    profile: dict
-    rules: list[dict]
+class ScreenTrial(BaseModel):
+    """One candidate trial's data as already cached client-side from `/match`'s
+    `trial_ready` event — resent on every `/screen` call since the backend is
+    stateless (CLAUDE.md P7). Trimmed to just what check_eligibility/access_outlook
+    actually consume, not the full raw CT.gov study record.
+    """
     nct_id: str
-    study: dict
+    rules: list[dict]
+    status_module: dict
+    locations: list[dict]
+    contact: dict
+    nearest_recruiting_distance_mi: float | None = None
+
+
+class ScreenAnswer(BaseModel):
+    cluster_key: str
+    field: str
+    rule_id: str | None = None
+    text: str
+    ledger_label: str
+
+
+class ScreenRequest(BaseModel):
+    base_profile: dict  # unmodified extract_profile() output — never overwritten
+    answers: list[ScreenAnswer]  # full ordered ledger every time, not a delta
+    trials: list[ScreenTrial]
     patient_lat: float | None = None
     patient_lon: float | None = None
-    answer: AnswerPatch | None = None
+
+
+class PublicAccessLinksRequest(BaseModel):
+    nct_id: str
+    facility_name: str | None = None
+    sponsor_name: str | None = None
 
 
 class ComposeRequest(BaseModel):

@@ -1,0 +1,142 @@
+.trial-access-view {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px 32px;
+  max-width: 860px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.trial-access-eyebrow {
+  color: var(--accent);
+  font-size: 11.5px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+
+.trial-access-title {
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.3;
+  margin-bottom: 6px;
+}
+
+.trial-access-subtitle {
+  color: var(--text-muted);
+  font-size: 13.5px;
+  margin-bottom: 24px;
+}
+
+.trial-access-section-heading {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 28px 0 12px;
+}
+
+.trial-access-source {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin-bottom: 10px;
+}
+
+.trial-access-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 20px;
+}
+
+.trial-access-grid--three {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.trial-access-grid h4 {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+  margin-bottom: 8px;
+}
+
+.trial-access-grid p {
+  font-size: 14px;
+  margin: 0 0 2px;
+}
+
+.trial-access-check-list,
+.trial-access-circle-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.trial-access-check-list li {
+  color: var(--tier-high);
+}
+
+.trial-access-circle-list li {
+  color: var(--text);
+}
+
+.trial-access-empty {
+  color: var(--text-muted);
+  font-size: 13.5px;
+}
+
+.trial-access-registry-link {
+  display: inline-block;
+  margin-top: 14px;
+  color: var(--accent);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.trial-access-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.trial-access-link-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.trial-access-link-list li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 13.5px;
+  padding: 8px 10px;
+  background: var(--surface-muted);
+  border-radius: 8px;
+}
+
+.trial-access-link-source {
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  white-space: nowrap;
+}
+
+@media (max-width: 640px) {
+  .trial-access-grid,
+  .trial-access-grid--three {
+    grid-template-columns: 1fr;
+  }
+}

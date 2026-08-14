@@ -45,15 +45,29 @@ export async function matchTrials(profile, radiusMi, onEvent) {
   }
 }
 
-export async function recompute({ profile, rules, nctId, study, patientLat, patientLon, answer }) {
-  const res = await fetch(`${BASE_URL}/recompute`, {
+// Stateless adaptive-narrowing step: resend the FULL ordered answer list every
+// time (never a delta) so retracting an earlier answer is just "call with one
+// fewer entry" — the backend replays from baseProfile, never patches forward.
+export async function screen({ baseProfile, answers, trials, patientLat, patientLon }) {
+  const res = await fetch(`${BASE_URL}/screen`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      profile, rules, nct_id: nctId, study,
-      patient_lat: patientLat ?? null, patient_lon: patientLon ?? null,
-      answer: answer ?? null,
+      base_profile: baseProfile,
+      answers,
+      trials,
+      patient_lat: patientLat ?? null,
+      patient_lon: patientLon ?? null,
     }),
+  })
+  return res.json()
+}
+
+export async function publicAccessLinks({ nctId, facilityName, sponsorName }) {
+  const res = await fetch(`${BASE_URL}/trial-access-links`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ nct_id: nctId, facility_name: facilityName ?? null, sponsor_name: sponsorName ?? null }),
   })
   return res.json()
 }

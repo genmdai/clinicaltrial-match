@@ -32,7 +32,7 @@
   gap: 6px;
   background: var(--accent-soft);
   color: var(--text);
-  border-radius: 999px;
+  border-radius: var(--radius-pill);
   padding: 6px 8px 6px 12px;
   font-size: 13px;
   line-height: 1.4;
@@ -68,24 +68,9 @@
 
 .assumption-fields input {
   border: 1px solid var(--border);
-  border-radius: 8px;
+  border-radius: var(--radius-sm);
   padding: 8px 10px;
   font-size: 14px;
   color: var(--text);
   background: var(--surface);
-}
-
-.btn-primary {
-  align-self: flex-start;
-  background: var(--accent);
-  color: var(--accent-contrast);
-  border: none;
-  border-radius: 999px;
-  padding: 10px 18px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
-.btn-primary:hover {
-  filter: brightness(1.05);
 }

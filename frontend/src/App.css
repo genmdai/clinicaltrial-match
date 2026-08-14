@@ -1,31 +1,14 @@
 .app-shell {
   display: flex;
-  flex-direction: column;
   height: 100svh;
 }
 
-.app-header {
+.app-main {
+  flex: 1;
   display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 22px;
-  border-bottom: 1px solid var(--border);
-  background: var(--surface);
-}
-
-.app-header h1 {
-  font-size: 17px;
-  font-weight: 700;
-  letter-spacing: -0.2px;
-}
-
-.offline-badge {
-  font-size: 11.5px;
-  font-weight: 700;
-  color: var(--tier-moderate);
-  background: var(--tier-moderate-bg);
-  border-radius: 999px;
-  padding: 3px 10px;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
 }
 
 .app-panes {
@@ -109,6 +92,19 @@
   text-align: center;
 }
 
+.trial-card--skeleton {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+}
+
+.trial-skeleton-note {
+  font-size: 12.5px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
 .disclaimer-bar {
   padding: 9px 22px;
   font-size: 12px;
@@ -119,6 +115,12 @@
 }
 
 @media (max-width: 860px) {
+  .app-shell {
+    flex-direction: column;
+    height: auto;
+    min-height: 100svh;
+  }
+
   .app-panes {
     flex-direction: column;
   }

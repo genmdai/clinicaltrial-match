@@ -1,7 +1,7 @@
 .compose-drawer-backdrop {
   position: fixed;
   inset: 0;
-  background: rgba(20, 24, 26, 0.4);
+  background: rgba(20, 20, 32, 0.45);
   display: flex;
   justify-content: flex-end;
   z-index: 50;

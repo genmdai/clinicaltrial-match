@@ -14,7 +14,7 @@
 
 .site-row {
   border: 1px solid var(--border);
-  border-radius: 10px;
+  border-radius: var(--radius-sm);
   padding: 10px 12px;
   font-size: 13px;
 }

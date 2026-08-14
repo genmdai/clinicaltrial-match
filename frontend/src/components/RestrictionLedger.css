@@ -1,0 +1,72 @@
+.restriction-ledger {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.restriction-ledger-header {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.restriction-row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 12px;
+  align-items: center;
+}
+
+.restriction-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--accent-soft);
+  color: var(--text);
+  border-radius: var(--radius-pill);
+  padding: 5px 8px 5px 12px;
+  font-size: 12.5px;
+  width: fit-content;
+}
+
+.restriction-remove {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  padding: 2px 4px;
+  border-radius: 50%;
+}
+
+.restriction-remove:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.restriction-ruled-out {
+  font-weight: 700;
+  color: var(--tier-blocked);
+  font-size: 13px;
+  text-align: right;
+}
+
+.restriction-remaining {
+  font-weight: 700;
+  font-size: 13px;
+  text-align: right;
+}
+
+.restriction-pending {
+  color: var(--text-muted);
+  text-align: right;
+}

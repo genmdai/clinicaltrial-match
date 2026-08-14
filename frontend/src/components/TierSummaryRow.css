@@ -1,0 +1,25 @@
+.tier-summary-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+}
+
+.tier-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+}
+
+.tier-pill strong {
+  font-weight: 700;
+}
+
+.tier-pill--high { background: var(--tier-high-bg); color: var(--tier-high); }
+.tier-pill--moderate { background: var(--tier-moderate-bg); color: var(--tier-moderate); }
+.tier-pill--low { background: var(--tier-low-bg); color: var(--tier-low); }
+.tier-pill--blocked { background: var(--tier-blocked-bg); color: var(--tier-blocked); }
+.tier-pill--unclear { background: var(--tier-unclear-bg); color: var(--tier-unclear); }

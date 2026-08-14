@@ -1,0 +1,45 @@
+.chat-intro-card {
+  position: relative;
+  overflow: hidden;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  border-radius: var(--radius);
+  padding: var(--space-5);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.chat-intro-shape {
+  position: absolute;
+  top: -30px;
+  right: -30px;
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  background: var(--accent-secondary);
+  opacity: 0.35;
+}
+
+.chat-intro-shape::after {
+  content: '';
+  position: absolute;
+  inset: 22px;
+  border-radius: 50%;
+  background: var(--accent);
+  opacity: 0.9;
+}
+
+.chat-intro-heading {
+  position: relative;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.chat-intro-text {
+  position: relative;
+  font-size: 13.5px;
+  line-height: 1.5;
+  max-width: 88%;
+  opacity: 0.92;
+}

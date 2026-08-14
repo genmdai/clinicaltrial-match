@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import './AssumptionsCard.css'
 
 function fieldLabel(profile) {
@@ -6,18 +6,31 @@ function fieldLabel(profile) {
   return who
 }
 
-export default function AssumptionsCard({ profile, onConfirm }) {
+// No longer a confirm-before-search gate (P4 still requires inferred facts
+// stay visible/editable — it just can't block the first search anymore).
+// Editing age/condition/ZIP re-runs the whole match, since those change what
+// the search itself finds, not just narrowing an existing candidate set.
+export default function AssumptionsCard({ profile, onUpdate }) {
   const [draft, setDraft] = useState(profile)
   const [dismissed, setDismissed] = useState(() => new Set())
 
+  useEffect(() => {
+    setDraft(profile)
+    setDismissed(new Set())
+  }, [profile])
+
   const update = (field, value) => setDraft((d) => ({ ...d, [field]: value }))
   const visibleAssumptions = draft.assumptions.filter((_, i) => !dismissed.has(i))
+  const dirty =
+    draft.age !== profile.age ||
+    (draft.condition ?? draft.condition_raw ?? '') !== (profile.condition ?? profile.condition_raw ?? '') ||
+    (draft.location_zip ?? '') !== (profile.location_zip ?? '')
 
   return (
     <div className="assumptions-card">
-      <h3>Assumptions I made</h3>
+      <h3>What I understood</h3>
       <p className="assumptions-subtitle">
-        About {fieldLabel(draft)} — check these over before I search for trials.
+        About {fieldLabel(draft)} — edit anything that's off, it'll re-run the search.
       </p>
 
       {visibleAssumptions.length > 0 && (
@@ -67,9 +80,11 @@ export default function AssumptionsCard({ profile, onConfirm }) {
         </label>
       </div>
 
-      <button className="btn-primary" onClick={() => onConfirm({ ...draft, assumptions: visibleAssumptions })}>
-        Looks right — find trials
-      </button>
+      {dirty && (
+        <button className="btn-secondary" onClick={() => onUpdate({ ...draft, assumptions: visibleAssumptions })}>
+          Update and re-search
+        </button>
+      )}
     </div>
   )
 }
