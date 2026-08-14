@@ -52,3 +52,8 @@
   50% { width: 78%; }
   100% { width: 8%; }
 }
+
+.loading-step--active .loading-step-fill--measured {
+  animation: none;
+  transition: width 0.3s ease;
+}

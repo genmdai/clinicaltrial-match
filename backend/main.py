@@ -104,7 +104,7 @@ async def match(payload: MatchRequest):
         patient_lat, patient_lon = _resolve_patient_location(profile, offline_mode)
 
         # Fixed narration stages surfaced in the UI (ProgressStream / LoadingSteps) —
-        # keep this exact wording in sync with frontend/src/components/ProgressStream.jsx.
+        # keep this exact wording in sync with frontend/src/components/matchStages.js.
         yield _sse({"type": "progress", "message": "Searching recruiting trials…"})
 
         search_result = search_trials(
@@ -160,7 +160,16 @@ async def match(payload: MatchRequest):
         yield _sse({"type": "progress", "message": "Comparing eligibility criteria…"})
 
         hospital_access_stage_sent = False
+        total_to_parse = len(parse_inputs)
+        parsed_count = 0
         async for nct_id, result in parse_criteria_stream(parse_inputs):
+            parsed_count += 1
+            # Bedrock parsing (parse_criteria_stream) is the real bottleneck for
+            # the rest of this loop's wall-clock time, but the fixed narration
+            # stages above only fire once each — without this, the UI freezes
+            # on "Looking for hospital access information…" for the entire
+            # remaining batch. This gives the wait an honest live counter.
+            yield _sse({"type": "parse_progress", "completed": parsed_count, "total": total_to_parse})
             if "error" in result:
                 yield _sse({"type": "trial_error", "nct_id": nct_id, "message": result["error"]})
                 continue
@@ -201,6 +210,7 @@ async def match(payload: MatchRequest):
                 "contact": contact,
             })
 
+        yield _sse({"type": "progress", "message": "Finalizing results…"})
         yield _sse({"type": "done", "offline": offline_mode, "patient_lat": patient_lat, "patient_lon": patient_lon})
 
     return StreamingResponse(stream(), media_type="text/event-stream")

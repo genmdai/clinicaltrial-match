@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { formatQuestionText } from '../questionText'
 import './ScreeningQuestion.css'
 
 // Buttons are chosen by `answer_mode`, computed server-side in next_question.py:
@@ -23,9 +24,7 @@ export default function ScreeningQuestion({ question, noFurtherQuestions, onAnsw
   }
 
   const isRadius = question.cluster_key === '__travel_radius__'
-  const questionText = isRadius
-    ? question.label
-    : `${question.label} — decides ${question.decides_count} of the ${question.total_open} studies below`
+  const questionText = formatQuestionText(question)
 
   return (
     <div className="screening-question" key={question.cluster_key}>

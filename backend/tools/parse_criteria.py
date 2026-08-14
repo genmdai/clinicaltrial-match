@@ -183,12 +183,19 @@ def _reconcile_rule(raw: _ParsedRuleLLM, known_kind: str | None, nct_id: str, in
 
 
 async def _parse_one_async(nct_id: str, criteria_text: str) -> list[EligibilityRule]:
-    chunks = split_criteria(criteria_text)
+    # Inclusion and exclusion chunks don't depend on each other's output, so
+    # gather them instead of awaiting in sequence — halves a trial's own
+    # completion latency without raising peak concurrent Bedrock calls (each
+    # chunk still acquires _PARSE_SEMAPHORE independently).
+    chunks = list(split_criteria(criteria_text).items())
+    results = await asyncio.gather(
+        *(_extract_chunk_with_retry_async(chunk_text, criteria_text) for _, chunk_text in chunks)
+    )
+
     all_rules: list[EligibilityRule] = []
     index = 0
-    for chunk_kind, chunk_text in chunks.items():
+    for (chunk_kind, _), raw_rules in zip(chunks, results, strict=True):
         known_kind = chunk_kind if chunk_kind in ("inclusion", "exclusion") else None
-        raw_rules = await _extract_chunk_with_retry_async(chunk_text, criteria_text)
         for raw in raw_rules:
             all_rules.append(_reconcile_rule(raw, known_kind, nct_id, index, criteria_text))
             index += 1

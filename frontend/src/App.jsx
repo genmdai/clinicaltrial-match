@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { compose, extractProfile, matchTrials, publicAccessLinks, screen } from './api'
 import AssumptionsCard from './components/AssumptionsCard'
 import ChatIntroCard from './components/ChatIntroCard'
@@ -7,11 +7,13 @@ import LoadingSteps from './components/LoadingSteps'
 import ProgressStream from './components/ProgressStream'
 import RestrictionLedger from './components/RestrictionLedger'
 import ScreeningQuestion from './components/ScreeningQuestion'
-import Sidebar from './components/Sidebar'
 import StatCards from './components/StatCards'
 import TierSummaryRow from './components/TierSummaryRow'
+import TopBar from './components/TopBar'
 import TrialAccessView from './components/TrialAccessView'
 import TrialCard from './components/TrialCard'
+import TrialMap from './components/TrialMap'
+import { formatQuestionText } from './questionText'
 import './App.css'
 
 const INITIAL_GREETING =
@@ -20,6 +22,23 @@ const INITIAL_GREETING =
 
 let nextId = 0
 const uid = () => `m${nextId++}`
+
+// Max recruiting sites plotted per trial on the map — mirrors geo.py's
+// nearest_sites(n=3) convention (same cap TrialCard already used for its
+// single "nearest site" line). Without this, a single large multi-country
+// trial can list 1000+ recruiting sites and bury the map in pins.
+const MAX_SITES_PER_TRIAL = 3
+
+// Mirrors backend/tools/geo.py's haversine_miles — used to pick each trial's
+// nearest sites for the map when a patient location is known.
+function haversineMiles(lat1, lon1, lat2, lon2) {
+  const R = 3958.8
+  const toRad = (d) => (d * Math.PI) / 180
+  const dLat = toRad(lat2 - lat1)
+  const dLon = toRad(lon2 - lon1)
+  const a = Math.sin(dLat / 2) ** 2 + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2
+  return 2 * R * Math.asin(Math.sqrt(a))
+}
 
 function clusterLabel(question) {
   if (!question) return ''
@@ -39,6 +58,7 @@ export default function App() {
   const [profile, setProfile] = useState(null)
   const [pendingNarrative, setPendingNarrative] = useState(null)
   const [progressMessages, setProgressMessages] = useState([])
+  const [parseProgress, setParseProgress] = useState(null)
   const [matching, setMatching] = useState(false)
   const [searched, setSearched] = useState(false)
   const [totalCount, setTotalCount] = useState(null)
@@ -51,6 +71,7 @@ export default function App() {
   const [offlineMode, setOfflineMode] = useState(false)
   const [selectedTrialId, setSelectedTrialId] = useState(null)
   const [composeTrialId, setComposeTrialId] = useState(null)
+  const [focusedTrialId, setFocusedTrialId] = useState(null)
 
   const trialResultsRef = useRef({})
   const baseProfileRef = useRef(null)
@@ -96,12 +117,14 @@ export default function App() {
     setMatching(true)
     setSearched(true)
     setProgressMessages([])
+    setParseProgress(null)
     setCandidateTrials([])
     setTrialResults({})
     setTrialErrors({})
     setAnswers([])
     setScreenState(null)
     setSelectedTrialId(null)
+    setFocusedTrialId(null)
     setTotalCount(null)
     setConditionSearched(null)
 
@@ -111,6 +134,8 @@ export default function App() {
     await matchTrials(matchProfile, 50.0, (event) => {
       if (event.type === 'progress') {
         setProgressMessages((m) => [...m, event.message])
+      } else if (event.type === 'parse_progress') {
+        setParseProgress({ completed: event.completed, total: event.total })
       } else if (event.type === 'candidates') {
         setOfflineMode(event.offline)
         setTotalCount(event.total_count)
@@ -169,12 +194,25 @@ export default function App() {
 
   const handleUpdateProfile = (updated) => {
     setProfile(updated)
+    if (updated.condition_needs_clarification && updated.condition_clarifying_question) {
+      // Same gate as extractAndMatch: editing Age/Location here doesn't touch
+      // the Condition field, so an unresolved diagnosis ambiguity (e.g.
+      // "diabetes" with no type) would otherwise reach /match and fail there
+      // instead of just re-asking the question.
+      addMessage('bot', updated.condition_clarifying_question)
+      return
+    }
     runMatch(updated)
   }
 
   const handleAnswerQuestion = async (answerText) => {
     const nq = screenState?.next_question
     if (!nq) return
+    // ScreeningQuestion only ever shows the CURRENT question live — without
+    // archiving it here, the transcript ends up as a wall of undifferentiated
+    // answer pills once several questions have been answered in a row, with
+    // no record of what each one was answering.
+    addMessage('bot', formatQuestionText(nq))
     addMessage('user', answerText)
     const entry = {
       cluster_key: nq.cluster_key,
@@ -246,6 +284,49 @@ export default function App() {
 
   const composeTrial = composeTrialId ? getTrialView(composeTrialId) : null
   const selectedTrial = selectedTrialId ? getTrialView(selectedTrialId) : null
+  const focusedTrial = focusedTrialId ? getTrialView(focusedTrialId) : null
+
+  // Map pins: each visible trial contributes at most its MAX_SITES_PER_TRIAL
+  // nearest RECRUITING, geo-located sites (nearest to the patient when a
+  // location is known, otherwise just the first few) — a single large
+  // multi-country trial can otherwise list 1000+ recruiting sites and bury
+  // the map in pins for everyone else. Sites shared by more than one trial
+  // (common — same hospital, several studies) collapse into a single pin
+  // listing every trial there.
+  const patientLatLon = patientLocation.current.lat != null ? patientLocation.current : null
+  const sitesByKey = new Map()
+  visibleTrials.forEach((t) => {
+    const view = getTrialView(t.nct_id)
+    if (!view) return
+    const locations = view.study.protocolSection.contactsLocationsModule.locations ?? []
+    const recruiting = locations.filter((loc) => loc.geoPoint && loc.status === 'RECRUITING')
+    if (patientLatLon) {
+      recruiting.sort(
+        (a, b) =>
+          haversineMiles(patientLatLon.lat, patientLatLon.lon, a.geoPoint.lat, a.geoPoint.lon) -
+          haversineMiles(patientLatLon.lat, patientLatLon.lon, b.geoPoint.lat, b.geoPoint.lon),
+      )
+    }
+    recruiting.slice(0, MAX_SITES_PER_TRIAL).forEach((loc) => {
+      const key = `${loc.geoPoint.lat.toFixed(4)},${loc.geoPoint.lon.toFixed(4)}`
+      let site = sitesByKey.get(key)
+      if (!site) {
+        site = { key, lat: loc.geoPoint.lat, lon: loc.geoPoint.lon, facility: loc.facility, trials: [] }
+        sitesByKey.set(key, site)
+      }
+      site.trials.push({ nctId: t.nct_id, title: view.summary.title, tier: view.outlook.tier })
+    })
+  })
+  const sitePins = Array.from(sitesByKey.values())
+
+  // If narrowing the scope drops the focused trial out of openTrialIds, its
+  // pin no longer exists — don't leave a stale trial card in the panel.
+  useEffect(() => {
+    if (focusedTrialId && screenState && !openTrialIds.has(focusedTrialId)) {
+      setFocusedTrialId(null)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [screenState])
 
   const handleCompose = async (variant) => {
     if (!composeTrial) return { error: 'No trial selected.' }
@@ -282,6 +363,7 @@ export default function App() {
     setOfflineMode(false)
     setSelectedTrialId(null)
     setComposeTrialId(null)
+    setFocusedTrialId(null)
   }
 
   const handleFetchPublicAccessLinks = () => {
@@ -295,14 +377,14 @@ export default function App() {
 
   return (
     <div className="app-shell">
-      <Sidebar
-        onNewSearch={handleNewSearch}
-        showBackToMatches={Boolean(selectedTrial)}
-        onBackToMatches={() => setSelectedTrialId(null)}
-        offline={offlineMode}
-      />
-
       <div className="app-main">
+        <TopBar
+          onNewSearch={handleNewSearch}
+          showBackToMatches={Boolean(selectedTrial)}
+          onBackToMatches={() => setSelectedTrialId(null)}
+          offline={offlineMode}
+        />
+
         {selectedTrial ? (
           <TrialAccessView
             trial={selectedTrial}
@@ -358,7 +440,7 @@ export default function App() {
               </form>
             </section>
 
-            <section className="results-pane">
+            <section className={`results-pane ${candidateTrials.length > 0 ? 'results-pane--map' : ''}`}>
               {!searched && <p className="results-empty">Trial matches will appear here once you describe the patient.</p>}
 
               {searched && candidateTrials.length === 0 && !matching && (
@@ -368,43 +450,60 @@ export default function App() {
                 </p>
               )}
 
-              {matching && <LoadingSteps messages={progressMessages} active={matching} />}
+              {matching && <LoadingSteps messages={progressMessages} active={matching} liveProgress={parseProgress} />}
 
               {candidateTrials.length > 0 && (
-                <StatCards
-                  count={screenState ? openTrialIds.size : candidateTrials.length}
-                  label={screenState ? 'studies still open' : 'studies found'}
-                  screened={candidateTrials.length}
-                  total={totalCount ?? candidateTrials.length}
-                  condition={conditionSearched}
-                />
-              )}
-
-              <TierSummaryRow counts={tierCounts} />
-
-              {answers.length > 0 && (
-                <RestrictionLedger answers={answers} ledger={screenState?.ledger ?? []} onRemove={handleRetractAnswer} />
-              )}
-
-              {visibleTrials.map((t) => {
-                const view = getTrialView(t.nct_id)
-                if (!view) {
-                  return (
-                    <div key={t.nct_id} className="trial-card trial-card--skeleton">
-                      <h3 className="trial-title">{t.title}</h3>
-                      <p className="trial-skeleton-note">Scoring this trial…</p>
-                    </div>
-                  )
-                }
-                return (
-                  <TrialCard
-                    key={t.nct_id}
-                    trial={view}
-                    onSelectTrial={() => setSelectedTrialId(t.nct_id)}
-                    onOpenCompose={() => setComposeTrialId(t.nct_id)}
+                <div className="map-stage">
+                  <TrialMap
+                    sitePins={sitePins}
+                    patientLocation={patientLatLon}
+                    focusedTrialId={focusedTrialId}
+                    onSelectTrial={setFocusedTrialId}
                   />
-                )
-              })}
+
+                  <div className="map-toolbar">
+                    <StatCards
+                      count={screenState ? openTrialIds.size : candidateTrials.length}
+                      label={screenState ? 'studies still open' : 'studies found'}
+                      screened={candidateTrials.length}
+                      total={totalCount ?? candidateTrials.length}
+                      condition={conditionSearched}
+                    />
+                    <TierSummaryRow counts={tierCounts} />
+                    {answers.length > 0 && (
+                      <RestrictionLedger
+                        answers={answers}
+                        ledger={screenState?.ledger ?? []}
+                        onRemove={handleRetractAnswer}
+                      />
+                    )}
+                  </div>
+
+                  {focusedTrial ? (
+                    <div className="map-detail">
+                      <button
+                        type="button"
+                        className="map-detail-close"
+                        onClick={() => setFocusedTrialId(null)}
+                        aria-label="Close trial details"
+                      >
+                        ×
+                      </button>
+                      <div className="map-detail-panel">
+                        <TrialCard
+                          trial={focusedTrial}
+                          onSelectTrial={() => setSelectedTrialId(focusedTrialId)}
+                          onOpenCompose={() => setComposeTrialId(focusedTrialId)}
+                        />
+                      </div>
+                    </div>
+                  ) : (
+                    <p className="map-hint">
+                      {screenState ? 'Click a pin on the map to view trial details.' : 'Scoring trials…'}
+                    </p>
+                  )}
+                </div>
+              )}
             </section>
           </div>
         )}

@@ -1,0 +1,169 @@
+.trial-map {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 380px;
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.trial-map .leaflet-container {
+  /* Absolute + inset, not width/height:100% — this box's ancestors only set
+     min-height on mobile (.app-shell is height:auto there), so a percentage
+     height here would resolve against "auto" and collapse to 0. Positioning
+     against the nearest positioned ancestor's actual rendered box sidesteps
+     that CSS percentage-height restriction entirely. */
+  position: absolute;
+  inset: 0;
+  font-family: inherit;
+  background: var(--surface-muted);
+}
+
+.trial-marker-wrapper {
+  background: transparent;
+  border: none;
+  position: relative;
+}
+
+.trial-marker {
+  display: block;
+  width: 18px;
+  height: 18px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  border: 2px solid var(--surface);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.trial-marker-wrapper:hover .trial-marker {
+  transform: rotate(-45deg) scale(1.18);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.trial-marker--high { background: var(--tier-high); }
+.trial-marker--moderate { background: var(--tier-moderate); }
+.trial-marker--low { background: var(--tier-low); }
+.trial-marker--unclear { background: var(--tier-unclear); }
+.trial-marker--blocked { background: var(--tier-blocked); }
+
+.trial-marker--focused {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+  animation: trial-marker-glow 1.6s ease-in-out infinite;
+}
+
+@keyframes trial-marker-glow {
+  0%, 100% { box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35), 0 0 0 0 var(--accent-soft); }
+  50% { box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35), 0 0 0 7px var(--accent-soft); }
+}
+
+.patient-marker {
+  position: relative;
+  display: block;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: 2px solid var(--surface);
+  box-shadow: 0 0 0 4px var(--accent-soft);
+}
+
+.patient-marker-ring {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  animation: patient-pulse 2.2s ease-out infinite;
+}
+
+@keyframes patient-pulse {
+  0% { transform: scale(0.5); opacity: 0.9; }
+  100% { transform: scale(2.1); opacity: 0; }
+}
+
+.trial-map-popup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 220px;
+}
+
+.trial-map-popup-facility {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-muted);
+  margin: 0 0 2px;
+}
+
+.trial-map-popup-trial {
+  text-align: left;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 8px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  background: var(--surface-muted);
+  cursor: pointer;
+}
+
+.trial-map-popup-trial--high { color: var(--tier-high); }
+.trial-map-popup-trial--moderate { color: var(--tier-moderate); }
+.trial-map-popup-trial--low { color: var(--tier-low); }
+.trial-map-popup-trial--unclear { color: var(--tier-unclear); }
+.trial-map-popup-trial--blocked { color: var(--tier-blocked); }
+
+.trial-map-popup-trial:hover {
+  border-color: var(--accent);
+}
+
+/* Leaflet's default controls/popups are hardcoded white-on-black — override
+   so they follow the app's light/dark theme instead of clashing with it. */
+.trial-map .leaflet-control-zoom {
+  border: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.trial-map .leaflet-control-zoom a {
+  background: var(--surface);
+  color: var(--text);
+  border-color: var(--border) !important;
+}
+
+.trial-map .leaflet-control-zoom a:hover {
+  background: var(--surface-muted);
+}
+
+.trial-map .leaflet-control-attribution {
+  background: var(--surface);
+  color: var(--text-muted);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+  padding: 2px 8px;
+}
+
+.trial-map .leaflet-control-attribution a {
+  color: var(--text-muted);
+}
+
+.trial-map .leaflet-popup-content-wrapper {
+  background: var(--surface);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  box-shadow: var(--shadow);
+}
+
+.trial-map .leaflet-popup-content {
+  margin: 12px 14px;
+}
+
+.trial-map .leaflet-popup-tip {
+  background: var(--surface);
+}
+
+.trial-map .leaflet-popup-close-button {
+  color: var(--text-muted) !important;
+}

@@ -77,12 +77,20 @@
 
 .results-pane {
   flex: 1;
-  overflow-y: auto;
-  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  min-height: 0;
   background: var(--bg);
+}
+
+.results-pane:not(.results-pane--map) {
+  overflow-y: auto;
+  padding: 20px;
+  gap: 14px;
+}
+
+.results-pane--map {
+  overflow: hidden;
 }
 
 .results-empty {
@@ -90,6 +98,106 @@
   font-size: 14px;
   margin-top: 40px;
   text-align: center;
+}
+
+/* Full-bleed map canvas with everything else (stats, tier pills, ledger,
+   trial detail) floating on top of it, rather than stacked above/below in
+   normal flow — the map gets the whole pane instead of splitting it. */
+.map-stage {
+  position: relative;
+  flex: 1;
+  min-height: 380px;
+  overflow: hidden;
+}
+
+.map-stage .trial-map {
+  position: absolute;
+  inset: 0;
+  border-radius: 0;
+  border: none;
+}
+
+.map-toolbar {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.map-toolbar > * {
+  pointer-events: auto;
+}
+
+.map-toolbar .restriction-ledger {
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.map-detail {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  z-index: 600;
+  width: 380px;
+  max-width: calc(100% - 32px);
+  max-height: calc(100% - 32px);
+  display: flex;
+  animation: map-detail-in 0.2s ease;
+}
+
+@keyframes map-detail-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.map-detail-panel {
+  position: relative;
+  overflow-y: auto;
+  border-radius: var(--radius);
+}
+
+.map-detail-close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  z-index: 2;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  line-height: 1;
+  box-shadow: var(--shadow);
+}
+
+.map-detail-close:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+.map-hint {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  z-index: 500;
+  background: var(--surface);
+  padding: 10px 20px;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow);
+  font-size: 13px;
+  color: var(--text-muted);
+  white-space: nowrap;
 }
 
 .trial-card--skeleton {
@@ -130,5 +238,27 @@
     border-right: none;
     border-bottom: 1px solid var(--border);
     max-height: 45svh;
+  }
+
+  .map-stage {
+    /* The floating toolbar (stat cards + tier pills + ledger) can stack to
+       ~350px+ tall on a narrow screen — without headroom here it collides
+       with the bottom-anchored hint/detail card inside the same box. */
+    min-height: 640px;
+  }
+
+  .map-detail {
+    left: 16px;
+    right: 16px;
+    bottom: 12px;
+    width: auto;
+    max-width: none;
+    max-height: 70%;
+  }
+
+  .map-hint {
+    max-width: calc(100% - 32px);
+    white-space: normal;
+    text-align: center;
   }
 }

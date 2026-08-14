@@ -5,4 +5,5 @@ export const MATCH_STAGES = [
   'Checking recruiting sites…',
   'Comparing eligibility criteria…',
   'Looking for hospital access information…',
+  'Finalizing results…',
 ]
