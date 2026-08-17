@@ -2,6 +2,7 @@
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  min-width: 0;
 }
 
 .gap-input-hint {
@@ -13,14 +14,27 @@
 .gap-input-text-row {
   display: flex;
   gap: 8px;
+  min-width: 0;
 }
 
 .gap-input-text-row input {
-  flex: 1;
+  flex: 1 1 auto;
+  min-width: 0;
   border: 1px solid var(--border);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
+  padding: 9px 12px;
+  font: inherit;
   font-size: 14px;
   color: var(--text);
   background: var(--surface);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.gap-input-text-row input:hover {
+  border-color: var(--text-muted);
+}
+
+.gap-input-text-row .btn-secondary {
+  flex: none;
+  align-self: auto;
 }

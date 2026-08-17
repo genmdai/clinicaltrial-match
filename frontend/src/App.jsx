@@ -177,13 +177,13 @@ export default function App() {
     const extracted = result.profile
     dispatch({ type: 'EXTRACTION_RESOLVED', profile: extracted })
     if ((extracted.gaps ?? []).some((g) => g.required)) {
-      // The structured intake form below now gates the search — no more
-      // concatenating the next chat message onto this narrative and
-      // re-running full extraction on the combined blob. Optional gaps
-      // (e.g. missing biomarker status) don't reach this branch — they're
-      // shown in the form too, but never block a clean narrative from
-      // searching immediately.
-      addMessage('bot', "I need a bit more information before I can search — see the form below.")
+      // The intake card below gates the search — no more concatenating the
+      // next chat message onto this narrative and re-running full extraction
+      // on the combined blob. It renders as a single question in this state,
+      // and speaks for itself: an extra "see the form below" bot bubble just
+      // duplicated the question one line above it. Optional gaps (e.g.
+      // missing biomarker status) don't reach this branch — they ride along
+      // in the card but never block a clean narrative from searching.
       return
     }
     runMatch(extracted)
@@ -400,7 +400,13 @@ export default function App() {
                 )}
 
                 {profile && (
-                  <AssumptionsCard profile={profile} onResolveGap={handleResolveGap} onConfirm={handleConfirmProfile} />
+                  <AssumptionsCard
+                    profile={profile}
+                    onResolveGap={handleResolveGap}
+                    onConfirm={handleConfirmProfile}
+                    searched={searched}
+                    matching={matching}
+                  />
                 )}
 
                 {(matching || progressMessages.length > 0) && (

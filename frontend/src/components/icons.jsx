@@ -66,6 +66,50 @@ export function FunnelIcon({ className }) {
   )
 }
 
+// Intake card glyphs. The "read" mark stands for the agent having read the
+// narrative — a document with a scan line across it, not a generic sparkle.
+export function ReadIcon({ className }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true" {...STROKE_PROPS}>
+      <path d="M4 2.5H9.5L12.5 5.5V13.5H4V2.5Z" />
+      <path d="M9.3 2.6V5.7H12.4" />
+      <path d="M6 9.2H10.5" />
+    </svg>
+  )
+}
+
+export function PencilIcon({ className }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true" {...STROKE_PROPS}>
+      <path d="M11.2 2.9L13.1 4.8L5.6 12.3L3 13L3.7 10.4L11.2 2.9Z" />
+    </svg>
+  )
+}
+
+export function ChevronIcon({ className }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true" {...STROKE_PROPS}>
+      <path d="M5.5 3.5L10.5 8L5.5 12.5" />
+    </svg>
+  )
+}
+
+export function PlusIcon({ className }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true" {...STROKE_PROPS}>
+      <path d="M8 3.5V12.5M3.5 8H12.5" />
+    </svg>
+  )
+}
+
+export function CloseIcon({ className }) {
+  return (
+    <svg viewBox="0 0 16 16" className={className} aria-hidden="true" {...STROKE_PROPS}>
+      <path d="M4.5 4.5L11.5 11.5M11.5 4.5L4.5 11.5" />
+    </svg>
+  )
+}
+
 // TopBar wordmark mark: an abstract "route" glyph — start point, a curved
 // path, destination point — echoing the product name without borrowing a
 // stock icon-font glyph.

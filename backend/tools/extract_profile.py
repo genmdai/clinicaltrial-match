@@ -121,10 +121,20 @@ condition is mentioned in the whole narrative, that condition is the primary dia
 (condition/condition_raw) — never a comorbidity, even if it's a condition (like \
 diabetes or hypertension) that's often secondary in other contexts. Empty list if no \
 second condition is mentioned.
-- assumptions: a plain-English sentence for EVERY inference you made (outcome \
-inference, subject inference, drug identification, normalized condition, etc.) so a \
-human can review and correct it. If information is too vague to extract most fields, \
-say so here instead of guessing.
+- assumptions: plain-English sentences shown VERBATIM to the patient, in a card titled \
+"Here is what I understood". Write ONE sentence per genuine interpretation you made — an \
+inferred treatment outcome, a drug you identified, a condition you normalized, a subject \
+you inferred — addressed to the patient, about the patient.
+  - NEVER write about the input itself or about your own process: no "no narrative was \
+provided", no "the user only said 'hi'", no "no medical information can be extracted", \
+no "a condition is required before a search can be performed", no "every other field is \
+on hold". That is internal state, and putting it in front of a frightened patient reads \
+as a broken tool.
+  - Anything you still need is a `gap` — the UI asks it as a real question. Never \
+restate a gap as an assumption.
+  - If you made no interpretations, return an EMPTY LIST. An empty list is the correct, \
+common answer for a narrative that stated everything plainly, and is always better than \
+narrating an absence.
 
 Never fabricate a value for a field the narrative doesn't support — null/empty is \
 always better than a guess.
@@ -152,10 +162,10 @@ subject="relative", relation="grandmother", age=null, sex=null, condition=null, 
 biomarkers=[], prior_treatments=[], treatment_line=null, condition_needs_clarification=false, \
 condition_clarifying_question=null, gaps=[{gap_id: "condition_subtype", field: "condition", \
 reason: "ambiguous", label: "What type of cancer does she have?", answer_mode: "free_text", \
-options: [], example_quote: "cancer", required: true}], assumptions=["Condition is \
-only described as 'cancer' with no type, stage, or treatment history given — treated \
-as unknown rather than guessed.", "Follow-up needed: what type of cancer, and has she \
-had any treatment?"]
+options: [], example_quote: "cancer", required: true}], assumptions=["'Grandma' means \
+this is about your grandmother, not you."]
+(Note what is NOT in assumptions: nothing about the diagnosis being missing. The gap \
+already asks that as a question.)
 
 --- Worked example 4 (non-oncology, only condition mentioned -> primary, not comorbidity) ---
 Narrative: "I have diabetes, I'm 55, zip 94061"
@@ -164,17 +174,16 @@ comorbidities=[], location_zip="94061", condition_needs_clarification=false, \
 condition_clarifying_question=null, gaps=[{gap_id: "condition_subtype", field: "condition", \
 reason: "ambiguous", label: "What type of diabetes does the patient have?", \
 answer_mode: "choice", options: ["Type 1", "Type 2", "Gestational", "Not sure"], \
-example_quote: "I have diabetes", required: true}], assumptions=["Diabetes is the only \
-condition mentioned, so it's treated as the primary diagnosis, not a comorbidity.", \
-"Type of diabetes (Type 1, Type 2, gestational) is needed since eligible trials differ \
-sharply by type."]
+example_quote: "I have diabetes", required: true}], assumptions=["Treated diabetes as \
+your main diagnosis rather than a secondary condition."]
 
 --- Worked example 5 (specific subtype already given -> no clarification needed) ---
 Narrative: "I have type 2 diabetes, 60 years old, live in Paris, France"
 subject="self", age=60, condition="type 2 diabetes", condition_raw="type 2 diabetes", \
 comorbidities=[], location_zip="Paris, France", condition_needs_clarification=false, \
-condition_clarifying_question=null, gaps=[], assumptions=["Type 2 diabetes is specific \
-enough to search trials directly — no clarification needed."]
+condition_clarifying_question=null, gaps=[], assumptions=[]
+(Everything was stated plainly and nothing was interpreted, so assumptions is empty — \
+that is the correct answer, not an oversight.)
 
 --- Worked example 6 (condition specific, but a material field is simply missing) ---
 Narrative: "I was just diagnosed with non-small cell lung cancer, I'm 62, haven't \
@@ -185,9 +194,8 @@ condition_needs_clarification=false, condition_clarifying_question=null, \
 gaps=[{gap_id: "biomarker_status", field: "biomarkers", reason: "missing", \
 label: "Has she had biomarker testing done, like EGFR, ALK, or PD-L1?", \
 answer_mode: "yes_no_notsure", options: [], example_quote: null, required: false}], \
-assumptions=["Explicit 'haven't started any treatment' means treatment_line=0, not \
-unknown.", "No biomarker testing mentioned — many NSCLC trials require specific \
-biomarker status, so this is worth asking rather than assuming untested."]
+assumptions=["Took 'haven't started any treatment' to mean no prior lines of therapy, \
+rather than unknown."]
 
 --- Worked example 7 (no diagnosis mentioned at all) ---
 Narrative: "she's 68 and has been on Keytruda for a year"
@@ -197,9 +205,10 @@ drug_generic: "pembrolizumab", drug_class: "anti-PD-1 checkpoint inhibitor", \
 outcome: null, inferred: false, confidence: "high"}], condition_needs_clarification=false, \
 condition_clarifying_question=null, gaps=[{gap_id: "condition_missing", field: "condition", \
 reason: "missing", label: "What condition is this for?", answer_mode: "free_text", \
-options: [], example_quote: null, required: true}], assumptions=["No condition was \
-named anywhere in the narrative — every other field is on hold until there's a \
-diagnosis to search trials against."]
+options: [], example_quote: null, required: true}], assumptions=["Identified Keytruda \
+as pembrolizumab, an anti-PD-1 checkpoint inhibitor."]
+(Again: nothing in assumptions about the diagnosis being absent — the required gap \
+asks for it directly.)
 """
 
 
